@@ -3,6 +3,10 @@
 </p>
 
 <p align="center">
+  <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/covers-m-dark.svg"><source media="(max-width: 600px)" srcset="assets/covers-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="assets/covers-dark.svg"><img src="assets/covers-light.svg" alt="Mock covers in the house style, for talks that don't exist (yet): Self-hosted mail; Backups that restore; Four Pis and a cluster" width="100%"></picture>
+</p>
+
+<p align="center">
   <a href="nixos-homelab/"><picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/talk-nixos-homelab-m-dark.svg"><source media="(max-width: 600px)" srcset="assets/talk-nixos-homelab-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="assets/talk-nixos-homelab-dark.svg"><img src="assets/talk-nixos-homelab-light.svg" alt="01 — NixOS Homelab: One Blackview mini PC running NixOS from a flake: 29 containers, Matrix on k3s, and only two doors in from the network." width="100%"></picture></a>
 </p>
 
@@ -29,13 +33,14 @@ has a light and a dark version and a phone layout, and they follow your system t
 
 | piece | what moves |
 | --- | --- |
-| **banner** | the prompt types `ls -1`, the title draws in, three mock slides fan out, the marquee keeps scrolling |
+| **banner** | the prompt types `ls -1`, the title draws in, three made-up talk covers fan out, the marquee keeps scrolling |
+| **covers** | three mock covers for talks that don't exist (yet) wipe in, one after another |
 | **talk cards** | a mock of the talk's cover wipes in, the title draws, the chips and the talk's own palette pop in |
 | **keys** | the keycaps pop in; every few seconds the `→` key gets pressed |
 | **house style** | the specimens draw in under a marching dashed rule |
 | **footer** | the prompt types `exit`, the progress bar fills, the cursor blinks |
 
-The mock slides are drawn from each talk's title and palette; the real slides are on each talk's own page.
+The covers in the banner are for talks that don't exist (yet), drawn in the decks' style; the real slides are on each talk's own page. Edit `MOCK_COVERS` to change them.
 Everything plays once on load and stays still for people who prefer reduced motion.
 
 **Adding a talk:** put its folder next to `nixos-homelab/` with the deck as `index.html`, save its cover and a few

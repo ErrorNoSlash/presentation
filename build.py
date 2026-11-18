@@ -66,7 +66,29 @@ TALKS = [
         mouse=[(['Left click'], 'Next', ''), (['Right click'], 'Previous', 'no context menu'),
                (['Side →'], 'Next', 'forward button'), (['Side ←'], 'Previous', 'back button')],
         mouse_note='# off in laser mode (L), on links and buttons, and while dragging',
+        # its card on the main page shows a made-up cover in the deck's style, not the real slide
+        cover_mock=dict(variant='dark', host='thalamus', cmd='ssh thalamus', lead='NIXOS', big='HOMELAB',
+                        sub=['One mini PC, one flake,', 'and only two doors in.'], tag='01 · NOV 2026',
+                        band=['29 CONTAINERS', 'ONE MINI PC', 'TWO DOORS', 'NIXOS 26.05', 'K3S'], block='22 SLIDES',
+                        colors=dict(bg='#0D1B2E', ink='#F2F0EA', a1='#5277C3', a2='#7EBAE4', soft='#C9E1F3', dim='#AFC6DD')),
     ),
+]
+
+# Covers for talks that don't exist (yet): the banner fans these out.
+# Same type and composition as the real decks, each with its own palette.
+MOCK_COVERS = [
+    dict(name='Self-hosted mail', layout='tape', variant='dark', host='postbox', cmd='tail -f mail.log', lead='SELF-HOSTED', big='MAIL',
+         sub=['Running my own mail server,', 'and why nobody else should.'], tag='03 · DEC 2026',
+         band=['SPF', 'DKIM', 'DMARC', 'PORT 25', 'BLOCKLISTS', 'REVERSE DNS'], block='DELIVERED · 98.2%',
+         colors=dict(bg='#2A1215', ink='#FBF1E6', a1='#C8553D', a2='#F2A65A', soft='#F5E6CC', dim='#E9B9A6')),
+    dict(name='Backups that restore', layout='split', variant='light', host='vault', cmd='restic snapshots', lead='BACKUPS THAT', big='RESTORE',
+         sub=['Three copies, two media, one offsite.', 'And actually testing them.'], tag='04 · JAN 2027',
+         band=['3-2-1', 'RESTIC', 'OFFSITE', 'TESTED MONTHLY', 'ZERO LOSSES'], block='LAST RESTORE · 2 DAYS AGO',
+         colors=dict(bg='#E3F2E6', ink='#0F2419', a1='#2F7D4F', a2='#7CC68D', soft='#0F2419', dim='#3E6B4F')),
+    dict(name='Four Pis and a cluster', layout='rack', variant='dark', host='rack', cmd='kubectl get nodes', lead='FOUR PIS AND A', big='CLUSTER',
+         sub=['Bare-metal k3s on a shelf: what broke', 'first, and what stayed up.'], tag='05 · FEB 2027',
+         band=['4 NODES', 'K3S', 'LONGHORN', '16 GB TOTAL', 'POE POWERED'], block='4 / 4 READY',
+         colors=dict(bg='#17122B', ink='#F4F0FF', a1='#6C4AB6', a2='#B39CF0', soft='#E6DEFB', dim='#B9AEDA')),
 ]
 
 KEYS = [  # (keys, what, note)
@@ -371,13 +393,140 @@ def mock_content(kind, talk, uid):
         o.append(foot(navy, 4))
     return ''.join(o)
 
+def _stack(o, big, x, y, size, a1, a2, face, uid, anchor='start'):
+    """The decks' signature title: the word, with two cut-off copies stacked above it."""
+    for k, (col, dy) in enumerate([(a1, -0.62), (a2, -0.32)]):
+        band = f'v{uid}{k}'
+        o.append(f'<clipPath id="{band}"><rect x="0" y="{y + dy * size - size * 0.72:.0f}" width="1280" height="{size * 0.3:.0f}"/></clipPath>')
+        o.append(f'<g clip-path="url(#{band})">' + T(big, 'serif', size, x, y + dy * size, col, anchor=anchor)[0] + '</g>')
+    o.append(T(big, 'serif', size, x, y, face, anchor=anchor)[0])
+
+def _kicker(o, c, x, y, host_col, cmd_col, tag_col, dot_col, right=1184):
+    p, wa = T(c['host'], 'mono', 22, x, y, host_col); o.append(p)
+    o.append(T('❯', 'mono', 22, x + wa + 8, y, host_col)[0])
+    o.append(T(c['cmd'], 'mono', 22, x + wa + 38, y, cmd_col)[0])
+    o.append(f'<circle cx="{right - W(c["tag"], "monob", 16, 2) - 22:.0f}" cy="{y - 7}" r="6" fill="{dot_col}"/>')
+    o.append(T(c['tag'], 'monob', 16, right, y, tag_col, ls=2, anchor='end')[0])
+
+def _ticker(o, c, col, y=26, op=0.45):
+    o.append(f'<g opacity="{op}">' + T('  ·  '.join(c['band'] + c['band']), 'mono', 15, 28, y, col, ls=1)[0] + '</g>')
+
+def _arrow(x, y, col, size=56, sw=9):
+    h = size * 0.38
+    return (f'<path d="M {x} {y} v {size} m {-h:.0f} {-h:.0f} l {h:.0f} {h:.0f} l {h:.0f} {-h:.0f}" fill="none" stroke="{col}" '
+            f'stroke-width="{sw}" stroke-linecap="round" stroke-linejoin="round"/>')
+
+def cover_content(c, uid):
+    """A deck cover in the house style (1280x720 units). Every cover shares the type, the
+    prompt kicker and the stacked title; the 'layout' gives each one its own composition."""
+    C = c['colors']; bg, ink, a1, a2, soft, dim = C['bg'], C['ink'], C['a1'], C['a2'], C['soft'], C['dim']
+    lay = c.get('layout', 'classic')
+    o = [_r(0, 0, 1280, 720, bg)]
+
+    if lay == 'tape':        # title left, a live log window right, caution tape across the corner
+        _ticker(o, c, a2)
+        o.append(_r(0, 40, 1280, 1.5, a2, 0, 0.18))
+        o.append(f'<g opacity="0.06">' + T('@', 'serif', 760, 1330, 640, ink, anchor='end')[0] + '</g>')
+        _kicker(o, c, 96, 92, a2, ink, dim, a2)
+        o.append(T(c['lead'], 'serif', 44, 98, 168, ink)[0])
+        _stack(o, c['big'], 92, 430, 196, a1, a2, soft, uid)
+        for i, line in enumerate(c['sub']):
+            o.append(T(line, 'sans', 27, 98, 488 + i * 35, ink if i == 0 else dim)[0])
+        o.append(T(f'/a talk by {AUTHOR}', 'mono', 16, 98, 488 + len(c['sub']) * 35 + 12, dim)[0])
+        wx, wy, ww, wh = 700, 136, 484, 330            # the mail.log window
+        o.append(_r(wx, wy, ww, wh, '#000000', 16, 0.28) + f'<rect x="{wx}" y="{wy}" width="{ww}" height="{wh}" rx="16" fill="none" stroke="{a2}" stroke-opacity="0.35" stroke-width="2"/>')
+        o.append(''.join(f'<circle cx="{wx + 28 + k * 22}" cy="{wy + 26}" r="6.5" fill="{col}"/>' for k, col in enumerate([a1, a2, soft])))
+        o.append(T('mail.log', 'mono', 16, wx + ww / 2, wy + 32, dim, anchor='middle')[0])
+        o.append(_r(wx, wy + 50, ww, 1.5, a2, 0, 0.25))
+        log = [('09:14', 'to=<anna@…>', '250', a2), ('09:15', 'to=<tom@…>', '250', a2), ('09:15', 'from=<spam@…>', '550', a1),
+               ('09:17', 'to=<sara@…>', '250', a2), ('09:21', 'dkim=pass spf=pass', 'OK', soft), ('09:22', 'to=<jo@…>', '250', a2)]
+        for i, (tm, what, code, col) in enumerate(log):
+            ly = wy + 92 + i * 39
+            o.append(T(tm, 'mono', 17, wx + 26, ly, dim)[0] + T(what, 'mono', 17, wx + 110, ly, ink)[0])
+            cw = W(code, 'monob', 15) + 22
+            o.append(_r(wx + ww - 26 - cw, ly - 19, cw, 26, col, 7, 0.95) + T(code, 'monob', 15, wx + ww - 26 - cw / 2, ly - 1, bg, anchor='middle')[0])
+        for k, (col, rot, yy, txt_col) in enumerate([(a1, 4, 640, ink), (a2, -6, 620, bg)]):   # two crossed tapes
+            text = '  *  '.join(c['band'] * 3)
+            o.append(f'<g transform="rotate({rot} 980 {yy})">' + _r(560, yy - 30, 900, 62, col)
+                     + T(text, 'monob', 22, 580, yy + 9, txt_col, ls=1.5)[0] + '</g>')
+
+    elif lay == 'split':     # a dark 3·2·1 panel on the left, title and snapshot grid on the right
+        o.append(_r(0, 0, 440, 720, ink))
+        o.append(_r(440, 0, 840, 56, a1))
+        o.append(T('  ·  '.join(c['band'] * 2), 'monob', 17, 470, 35, '#FFFFFF', ls=1.6)[0])
+        for i, (num, what) in enumerate([('3', 'COPIES'), ('2', 'MEDIA'), ('1', 'OFFSITE')]):
+            y = 250 + i * 190
+            o.append(T(num, 'serif', 200, 80, y, a2)[0])
+            o.append(T(what, 'monob', 20, 230, y - 70, bg, ls=3)[0])
+            o.append(_r(230, y - 52, 140 - i * 30, 6, a2, 3, 0.6))
+        p, wa = T(c['host'], 'mono', 22, 500, 112, a1); o.append(p)
+        o.append(T('❯', 'mono', 22, 500 + wa + 8, 112, a1)[0] + T(c['cmd'], 'mono', 22, 500 + wa + 38, 112, ink)[0])
+        o.append(T(c['tag'], 'monob', 16, 1184, 112, dim, ls=2, anchor='end')[0])
+        o.append(T(c['lead'], 'serif', 46, 500, 196, ink)[0])
+        size = min(170, 690 / max(W(c['big'], 'serif', 1), 1))
+        ty = 196 + 22 + size * 1.34                       # the stack starts just under the lead line
+        _stack(o, c['big'], 496, ty, size, a1, a2, ink, uid)
+        gy = ty + 56                                      # snapshot grid: 4 weeks of nightly snapshots
+        for r in range(4):
+            for k in range(14):
+                x = 500 + k * 47; y = gy + r * 34
+                hit = (r, k) == (0, 9)
+                o.append(_r(x, y, 39, 26, ink if hit else a1, 6, 1 if hit else 0.25 + 0.6 * ((k * 7 + r * 3) % 5) / 5))
+        o.append(T('restored', 'monob', 15, 500 + 9 * 47 + 19, gy - 10, ink, anchor='middle')[0])
+        sy = gy + 4 * 34 + 40
+        o.append(T(c['sub'][0], 'sans', 26, 500, sy, ink)[0] + T(c['sub'][1], 'sans', 26, 500, sy + 34, dim)[0])
+        o.append(T(f'/a talk by {AUTHOR}', 'mono', 16, 1184, sy + 34, dim, anchor='end')[0])
+
+    elif lay == 'rack':      # a centred title over four boards cabled to a switch
+        _ticker(o, c, a2)
+        o.append(_r(0, 40, 1280, 1.5, a2, 0, 0.18))
+        _kicker(o, c, 96, 92, a2, ink, dim, a2)
+        o.append(T(c['lead'], 'serif', 40, 640, 160, ink, anchor='middle')[0])
+        size = min(150, 1000 / max(W(c['big'], 'serif', 1), 1))
+        _stack(o, c['big'], 640, 176 + size * 1.34, size, a1, a2, soft, uid, anchor='middle')
+        bw, gap, by = 206, 30, 446
+        x0 = 640 - (4 * bw + 3 * gap) / 2
+        o.append(_r(390, 618, 500, 30, a1, 8))
+        o.append(''.join(_r(414 + k * 38, 627, 22, 12, bg, 3, 0.8) for k in range(12)))
+        for k in range(4):
+            x = x0 + k * (bw + gap)
+            o.append(f'<path d="M {x + bw / 2:.0f} {by + 120} C {x + bw / 2:.0f} {by + 150}, {414 + k * 114 + 11:.0f} {590}, {414 + k * 114 + 11:.0f} 627" '
+                     f'fill="none" stroke="{a2}" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>')
+            o.append(_r(x, by, bw, 120, '#FFFFFF', 12, 0.06) + f'<rect x="{x:.0f}" y="{by}" width="{bw}" height="120" rx="12" fill="none" stroke="{a2}" stroke-opacity="0.5" stroke-width="2"/>')
+            o.append(_r(x + 18, by + 22, 52, 52, soft, 6, 0.9) + _r(x + 80, by + 26, 26, 16, a2, 3, 0.7) + _r(x + 80, by + 50, 40, 10, a2, 3, 0.4))
+            o.append(f'<circle cx="{x + bw - 26:.0f}" cy="{by + 30}" r="7" fill="{a2}"/><circle cx="{x + bw - 48:.0f}" cy="{by + 30}" r="7" fill="{soft}" opacity="0.5"/>')
+            o.append(T(f'node-0{k + 1}', 'mono', 17, x + 18, by + 104, ink)[0] + T('READY', 'monob', 14, x + bw - 18, by + 104, a2, anchor='end', ls=1.5)[0])
+        o.append(T(' '.join(c['sub']), 'sans', 22, 96, 696, dim)[0])
+        o.append(T(f'/a talk by {AUTHOR}', 'mono', 15, 1184, 696, dim, anchor='end')[0])
+
+    else:                    # 'classic': the NixOS deck's own cover composition
+        _ticker(o, c, a2)
+        o.append(_r(0, 40, 1280, 1.5, a2, 0, 0.18))
+        _kicker(o, c, 96, 92, a2, ink, dim, a2)
+        o.append(f'<g opacity="{0.07 if c["variant"] == "dark" else 0.09}">' + T(c['tag'][:2], 'serif', 560, 1250, 600, ink, anchor='end')[0] + '</g>')
+        y = 440
+        size = min(186, 1090 / max(W(c['big'], 'serif', 1), 1))
+        o.append(T(c['lead'], 'serif', 50, 98, 176, ink)[0])
+        _stack(o, c['big'], 92, y, size, a1, a2, soft if c['variant'] == 'dark' else ink, uid)
+        for i, line in enumerate(c['sub']):
+            o.append(T(line, 'sans', 28, 98, y + 58 + i * 36, ink if i == 0 else dim)[0])
+        o.append(T(f'/a talk by {AUTHOR}', 'mono', 16, 98, y + 58 + len(c['sub']) * 36 + 14, dim)[0])
+        bx, by, bw, bh = 914, 470, 366, 170
+        o.append(_r(bx, by, bw, bh, a2 if c['variant'] == 'light' else soft))
+        ac = bg if c['variant'] == 'dark' else C['ink']
+        o.append(_arrow(bx + 46, by + 26, ac))
+        o.append(T(c['block'], 'monob', 15, bx + 28, by + 138, ac, ls=1.6)[0])
+        o.append(_r(0, 640, 1280, 80, a2 if c['variant'] == 'dark' else a1))
+        o.append(T('  *  '.join(c['band'] * 3), 'monob', 26, -40, 690, bg if c['variant'] == 'dark' else '#FFFFFF', ls=1.5)[0])
+    return ''.join(o)
+
 def mock(kind, talk, x, y, w, rot, cls, delay, uid, origin=None):
     h = w * 9 / 16; s_ = w / 1280
     ox, oy = origin or (x + w / 2, y + h)
     return (f'<g class="{cls}" style="{at(delay)};transform-origin:{ox:.0f}px {oy:.0f}px;--r:{rot}deg;transform:rotate({rot}deg)">'
             f'<g filter="url(#sh)"><g transform="translate({x:.1f} {y:.1f}) scale({s_:.5f})">'
             f'<clipPath id="k{uid}"><rect width="1280" height="720" rx="28"/></clipPath>'
-            f'<g clip-path="url(#k{uid})">{mock_content(kind, talk, uid)}</g></g></g></g>')
+            f'<g clip-path="url(#k{uid})">{cover_content(kind, uid) if isinstance(kind, dict) else mock_content(kind, talk, uid)}</g></g></g></g>')
 
 def shadow(t):
     a = '0.28' if t is THEMES['light'] else '0.7'
@@ -411,7 +560,7 @@ def banner(t, mobile):
             p, _ = T(line, 'sans', 30, M, 370 + i * 44, t['ink'] if i == 0 else t['muted'], cls='rise', style=at(0.95 + i * 0.05))
             out.append(p)
         y0 = 370 + len(sub) * 44 + 40
-        fan = [('list', 150, y0 + 40, 400, 8), ('grid', 110, y0 + 20, 400, 2), ('cover', 70, y0, 400, -5)]
+        fan = [(MOCK_COVERS[2], 150, y0 + 40, 400, 8), (MOCK_COVERS[1], 110, y0 + 20, 400, 2), (MOCK_COVERS[0], 70, y0, 400, -5)]
         for i, (kind, x, y, sw, rot) in enumerate(fan):
             out.append(mock(kind, TALKS[0], x, y, sw, rot, 'fan', 1.1 + i * 0.12, f'c{i}', (x + sw / 2, y + sw * 9 / 16 + 40)))
         out.append(T('00 — INDEX', 'monob', 18, M, 912, t['muted'], ls=2.5)[0])
@@ -431,7 +580,7 @@ def banner(t, mobile):
         for i, line in enumerate(sub):
             p, _ = T(line, 'sans', 25, M, 410 + i * 36, t['ink'] if i == 0 else t['muted'], cls='rise', style=at(0.95 + i * 0.05))
             out.append(p)
-        fan = [('list', 770, 150, 430, 8), ('grid', 730, 120, 430, 2), ('cover', 690, 96, 430, -5)]
+        fan = [(MOCK_COVERS[2], 770, 150, 430, 8), (MOCK_COVERS[1], 730, 120, 430, 2), (MOCK_COVERS[0], 690, 96, 430, -5)]
         for i, (kind, x, y, sw, rot) in enumerate(fan):
             out.append(mock(kind, TALKS[0], x, y, sw, rot, 'fan', 0.9 + i * 0.12, f'c{i}', (x + sw / 2, y + sw * 9 / 16 + 60)))
         out.append(T('00 — INDEX', 'monob', 15, M, 536, t['muted'], ls=2)[0])
@@ -462,7 +611,7 @@ def talk_card(n, talk, t, mobile):
     if mobile:
         sw = w - 2 * M; sy = 64
         out.append(mock('grid', talk, M, sy + 10, sw, -3.5, 'back', 0.2, 'b0'))
-        out.append(mock('cover', talk, M, sy, sw, 0, 'front', 0.1, 'f0'))
+        out.append(mock(talk['cover_mock'], talk, M, sy, sw, 0, 'front', 0.1, 'f0'))
         y = sy + sw * 9 / 16 + 84
         out.append(T(f'{n:02d}', 'monob', 22, M, y, t['muted'], cls='rise', style=at(0.5))[0])
         out.append(T(f'· {talk["date"]}', 'mono', 22, M + 40, y, t['muted'], cls='rise', style=at(0.5))[0])
@@ -484,7 +633,7 @@ def talk_card(n, talk, t, mobile):
     else:
         h = 470; sw = 590; sx, sy = M, 62
         out.append(mock('grid', talk, sx, sy + 12, sw, -3.5, 'back', 0.2, 'b0'))
-        out.append(mock('cover', talk, sx, sy, sw, 0, 'front', 0.1, 'f0'))
+        out.append(mock(talk['cover_mock'], talk, sx, sy, sw, 0, 'front', 0.1, 'f0'))
         x = M + sw + 64; tw = w - M - x
         out.append(T(f'{n:02d}', 'monob', 18, x, 92, t['muted'], cls='rise', style=at(0.45))[0])
         out.append(T(f'· {talk["date"]}', 'mono', 18, x + 32, 92, t['muted'], cls='rise', style=at(0.45))[0])
@@ -753,6 +902,36 @@ def palette(talk, t, mobile):
     rows = (len(talk['palette']) + cols - 1) // cols
     return svg(w, 90 + rows * rowh, t, ''.join(out), 'Palette: ' + ', '.join(f'{n} {c}' for c, n in talk['palette']))
 
+def covers_strip(t, mobile):
+    """The made-up covers side by side, each fully visible."""
+    w = 640 if mobile else 1280; M = 40 if mobile else 80
+    out, css = [shadow(t)], ANIM_SLIDES
+    size = 20 if mobile else 15
+    out.append(T('[ COVERS ]', 'monob', size, M, 60, t['muted'], ls=2.4, cls='rise', style=at(0.05))[0])
+    if not mobile:
+        out.append(T("# mock covers in the house style · talks that don't exist (yet)", 'mono', size, w - M, 60, t['muted'],
+                     anchor='end', cls='rise', style=at(0.1))[0])
+    cols = 1 if mobile else 3; gap = 28
+    sw = (w - 2 * M - gap * (cols - 1)) / cols; sh = sw * 9 / 16
+    rowh = sh + (104 if mobile else 86)
+    for i, c in enumerate(MOCK_COVERS):
+        x = M + (i % cols) * (sw + gap); y = (96 if not mobile else 84) + (i // cols) * rowh
+        d = 0.15 + i * 0.14
+        out.append(mock(c, None, x, y, sw, 0, 'front', d, f's{i}'))
+        ty = y + sh + (38 if mobile else 34)
+        title = c['name']
+        tag = c['tag'].lower()
+        out.append(T(tag, 'monob', size, x, ty, t['muted'], cls='rise', style=at(d + 0.35))[0])
+        out.append(T(title, 'sans', size + 5, x + W(tag, 'monob', size) + 14, ty, t['ink'], cls='rise', style=at(d + 0.4))[0])
+    if mobile:
+        y = (84 + len(MOCK_COVERS) * rowh)
+        out.append(T("# mock covers · talks that don't exist (yet)", 'mono', size - 1, M, y, t['muted'], cls='rise', style=at(0.6))[0])
+        h = int(y + 36)
+    else:
+        h = int(96 + ((len(MOCK_COVERS) + cols - 1) // cols) * rowh)
+    label = "Mock covers for talks that don't exist (yet): " + '; '.join(c['name'] for c in MOCK_COVERS)
+    return svg(w, h, t, ''.join(out), label, css)
+
 # ─── README ─────────────────────────────────────────────────────────────────
 def pic(name, alt, href=None, base='assets/'):
     p = (f'<picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="{base}{name}-m-dark.svg">'
@@ -767,6 +946,10 @@ def readme():
         for i, x in enumerate(TALKS))
     return f"""<p align="center">
   {pic("banner", "presentations ❯ ls -1 — Every talk, one file. The slides for my talks, one folder each.")}
+</p>
+
+<p align="center">
+  {pic("covers", "Mock covers in the house style, for talks that don't exist (yet): " + "; ".join(c["name"] for c in MOCK_COVERS))}
 </p>
 
 {cards}
@@ -794,13 +977,14 @@ has a light and a dark version and a phone layout, and they follow your system t
 
 | piece | what moves |
 | --- | --- |
-| **banner** | the prompt types `ls -1`, the title draws in, three mock slides fan out, the marquee keeps scrolling |
+| **banner** | the prompt types `ls -1`, the title draws in, three made-up talk covers fan out, the marquee keeps scrolling |
+| **covers** | three mock covers for talks that don't exist (yet) wipe in, one after another |
 | **talk cards** | a mock of the talk's cover wipes in, the title draws, the chips and the talk's own palette pop in |
 | **keys** | the keycaps pop in; every few seconds the `→` key gets pressed |
 | **house style** | the specimens draw in under a marching dashed rule |
 | **footer** | the prompt types `exit`, the progress bar fills, the cursor blinks |
 
-The mock slides are drawn from each talk's title and palette; the real slides are on each talk's own page.
+The covers in the banner are for talks that don't exist (yet), drawn in the decks' style; the real slides are on each talk's own page. Edit `MOCK_COVERS` to change them.
 Everything plays once on load and stays still for people who prefer reduced motion.
 
 **Adding a talk:** put its folder next to `nixos-homelab/` with the deck as `index.html`, save its cover and a few
@@ -869,6 +1053,7 @@ def main():
         for mobile in (False, True):
             sfx = ('-m' if mobile else '') + '-' + theme
             write(f'banner{sfx}.svg', banner(t, mobile))
+            write(f'covers{sfx}.svg', covers_strip(t, mobile))
             for i, talk in enumerate(TALKS):
                 s = talk['slug']
                 write(f'talk-{s}{sfx}.svg', talk_card(i + 1, talk, t, mobile))
