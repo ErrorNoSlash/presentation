@@ -1,58 +1,56 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/banner-dark.png">
-  <img alt="presentations ❯ ls -1 — Every talk, one file. The slides for my talks, one folder each." src=".github/readme/banner-light.png" width="100%">
-</picture>
+<p align="center">
+  <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset=".github/readme/banner-m-dark.svg"><source media="(max-width: 600px)" srcset=".github/readme/banner-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset=".github/readme/banner-dark.svg"><img src=".github/readme/banner-light.svg" alt="presentations ❯ ls -1 — Every talk, one file. The slides for my talks, one folder each." width="100%"></picture>
+</p>
 
-<br>
+<p align="center">
+  <a href="nixos-homelab/"><picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset=".github/readme/talk-nixos-homelab-m-dark.svg"><source media="(max-width: 600px)" srcset=".github/readme/talk-nixos-homelab-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset=".github/readme/talk-nixos-homelab-dark.svg"><img src=".github/readme/talk-nixos-homelab-light.svg" alt="01 — NixOS Homelab: One Blackview mini PC running NixOS from a flake: 29 containers, Matrix on k3s, and only two doors in from the network." width="100%"></picture></a>
+</p>
 
-<a href="nixos-homelab/">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/readme/talk-nixos-homelab-dark.png">
-    <img alt="01 — NixOS Homelab: one Blackview mini PC running NixOS from a flake, 29 containers, Matrix on k3s, two doors. 22 slides, 8 chapters." src=".github/readme/talk-nixos-homelab-light.png" width="100%">
-  </picture>
-</a>
-
-<p align="center"><code>▶ <a href="nixos-homelab/index.html">nixos-homelab/index.html</a></code> &nbsp;·&nbsp; <code><a href="nixos-homelab/">chapters &amp; notes</a></code></p>
-
-<br>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/keys-dark.png">
-  <img alt="Presenting: → / Space / PageDown / clicker = next, ← / PageUp = previous, S = speaker view, F = fullscreen, B = black screen, L = laser pointer, M = reduce motion, Esc = back to editor." src=".github/readme/keys-light.png" width="100%">
-</picture>
+<p align="center">
+  <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset=".github/readme/keys-m-dark.svg"><source media="(max-width: 600px)" srcset=".github/readme/keys-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset=".github/readme/keys-dark.svg"><img src=".github/readme/keys-light.svg" alt="Presenting: → / Space = Next; ← / PgUp = Previous; S = Speaker view; F = Fullscreen; B = Black screen; L = Laser pointer; M = Reduce motion; Esc = Back to editor" width="100%"></picture>
+</p>
 
 > [!TIP]
-> **To open a talk**, download its `index.html` (**⋯ → Download**) and open it in any modern browser. It runs fully offline.
-> GitHub only shows the file as source code.
+> **To open a talk**, open its folder, download `index.html` and open it in a browser. It runs offline;
+> GitHub itself only shows the file as source code.
 
-<br>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/style-dark.png">
-  <img alt="House style: Fraunces Black for titles, Instrument Sans for body, JetBrains Mono for labels. host ❯ command kickers, [ SECTION ] labels, # asides, chapter footers, an own palette per talk, things draw themselves." src=".github/readme/style-light.png" width="100%">
-</picture>
+<p align="center">
+  <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset=".github/readme/style-m-dark.svg"><source media="(max-width: 600px)" srcset=".github/readme/style-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset=".github/readme/style-dark.svg"><img src=".github/readme/style-light.svg" alt="House style: Fraunces Black titles, Instrument Sans body, JetBrains Mono labels, shell-prompt kickers, bracketed labels, # asides, chapter footers, its own palette per talk" width="100%"></picture>
+</p>
 
 <details>
-<summary><b>Adding a talk</b></summary>
+<summary><code>[ HOW THIS README WORKS ]</code></summary>
+
 <br>
 
-1. Make a folder `kebab-case-name/` holding the deck as `index.html` and a short `README.md`
-   (copy [`nixos-homelab/README.md`](nixos-homelab/README.md)).
-2. Add its card under the last one, numbered `02`, `03`, …, in the same style: cover slide on the left, title,
-   one-line description, slide and chapter count, and the talk's own palette.
+No screenshots of text, no third-party cards. Every image is an SVG drawn by [`build.py`](build.py) in the decks'
+own style, with the text turned into outlines. The fonts are taken straight out of a deck's `index.html`. Each image
+has a light and a dark version and a phone layout, and they follow your system theme.
+
+| piece | what moves |
+| --- | --- |
+| **banner** | the prompt types `ls -1`, the title draws in, three real slides fan out, the marquee keeps scrolling |
+| **talk cards** | the cover slide wipes in, the title draws, the chips and the talk's own palette pop in |
+| **keys** | the keycaps pop in; every few seconds the `→` key gets pressed |
+| **house style** | the specimens draw in under a marching dashed rule |
+| **footer** | the prompt types `exit`, the progress bar fills, the cursor blinks |
+
+Everything plays once on load and stays still for people who prefer reduced motion.
+
+**Adding a talk:** put its folder next to `nixos-homelab/` with the deck as `index.html`, save a few 960×540
+screenshots in `.github/readme/thumbs/` (cover first), add it to `TALKS` in `build.py`, and run:
+
+```sh
+pip install fonttools uharfbuzz brotli
+python3 build.py
+```
+
+**Editing a deck:** open its `index.html`, press `Esc`, edit, then save with `⌘S` / `Ctrl+S`.
 
 </details>
 
-<details>
-<summary><b>Editing a deck</b></summary>
-<br>
+<p align="center">
+  <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset=".github/readme/footer-m-dark.svg"><source media="(max-width: 600px)" srcset=".github/readme/footer-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset=".github/readme/footer-dark.svg"><img src=".github/readme/footer-light.svg" alt="presentations ❯ exit — Dias Stas, 2026" width="100%"></picture>
+</p>
 
-Open `index.html`, press `Esc` to reach the editor, and save with `⌘S` / `Ctrl+S`. The file rewrites itself,
-or downloads an updated copy in browsers that can't write files in place. The slides are plain JSON inside the
-`bento-doc` script block.
-
-</details>
-
-<br>
-
-<sub>Built with <a href="https://bento.page">Bento Slides</a> (MIT) · Fraunces, Instrument Sans and JetBrains Mono under the SIL Open Font License 1.1 · <code># EOF</code></sub>
+<p align="center"><sub>Built with <a href="https://bento.page">Bento Slides</a> (MIT) · Fraunces, Instrument Sans and JetBrains Mono under the SIL Open Font License 1.1</sub></p>
