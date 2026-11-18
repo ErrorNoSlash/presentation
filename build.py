@@ -16,7 +16,7 @@ off for people who prefer reduced motion.
     python3 build.py
 
 To add a talk: put its folder next to the others, drop a few 960x540 screenshots
-in .github/readme/thumbs/ (cover first), add it to TALKS and run the script.
+in assets/thumbs/ (cover first), add it to TALKS and run the script.
 """
 import base64, io, json, os, re, zlib
 from xml.sax.saxutils import escape
@@ -28,7 +28,7 @@ from fontTools.pens.transformPen import TransformPen
 from fontTools.varLib.instancer import instantiateVariableFont
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(ROOT, '.github', 'readme')
+OUT = os.path.join(ROOT, 'assets')
 THUMBS = os.path.join(OUT, 'thumbs')
 
 # ─── content ────────────────────────────────────────────────────────────────
@@ -494,10 +494,10 @@ def footer(t, mobile):
 
 # ─── README ─────────────────────────────────────────────────────────────────
 def pic(name, alt, href=None):
-    p = (f'<picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset=".github/readme/{name}-m-dark.svg">'
-         f'<source media="(max-width: 600px)" srcset=".github/readme/{name}-m-light.svg">'
-         f'<source media="(prefers-color-scheme: dark)" srcset=".github/readme/{name}-dark.svg">'
-         f'<img src=".github/readme/{name}-light.svg" alt="{escape(alt, {chr(34): "&quot;"})}" width="100%"></picture>')
+    p = (f'<picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/{name}-m-dark.svg">'
+         f'<source media="(max-width: 600px)" srcset="assets/{name}-m-light.svg">'
+         f'<source media="(prefers-color-scheme: dark)" srcset="assets/{name}-dark.svg">'
+         f'<img src="assets/{name}-light.svg" alt="{escape(alt, {chr(34): "&quot;"})}" width="100%"></picture>')
     return f'<a href="{href}">{p}</a>' if href else p
 
 def readme():
@@ -542,7 +542,7 @@ has a light and a dark version and a phone layout, and they follow your system t
 Everything plays once on load and stays still for people who prefer reduced motion.
 
 **Adding a talk:** put its folder next to `nixos-homelab/` with the deck as `index.html`, save a few 960×540
-screenshots in `.github/readme/thumbs/` (cover first), add it to `TALKS` in `build.py`, and run:
+screenshots in `assets/thumbs/` (cover first), add it to `TALKS` in `build.py`, and run:
 
 ```sh
 pip install fonttools uharfbuzz brotli
