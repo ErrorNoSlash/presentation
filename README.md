@@ -1,77 +1,58 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/banner-dark.svg">
-  <img alt="presentations ❯ ls -1 — Every talk, one file." src=".github/readme/banner-light.svg" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/banner-dark.png">
+  <img alt="presentations ❯ ls -1 — Every talk, one file. The slides for my talks, one folder each." src=".github/readme/banner-light.png" width="100%">
 </picture>
 
-`# one folder per talk · one self-contained html file each · no install, no server, no internet`
-
-## `[ TALKS ]`
+<br>
 
 <a href="nixos-homelab/">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/readme/talk-nixos-homelab-dark.svg">
-    <img alt="01 — NixOS Homelab: one mini pc, nixos 26.05, 29 containers, two doors. 22 slides, Nov 2026." src=".github/readme/talk-nixos-homelab-light.svg" width="100%">
+    <source media="(prefers-color-scheme: dark)" srcset=".github/readme/talk-nixos-homelab-dark.png">
+    <img alt="01 — NixOS Homelab: one Blackview mini PC running NixOS from a flake, 29 containers, Matrix on k3s, two doors. 22 slides, 8 chapters." src=".github/readme/talk-nixos-homelab-light.png" width="100%">
   </picture>
 </a>
 
-| `#` | Talk | Covers | Slides | |
-|:--|:--|:--|--:|:--|
-| `01` | **[NixOS Homelab](nixos-homelab/)** | `# one mini pc, nixos 26.05, 29 containers, two doors` | 22 | [`▶ index.html`](nixos-homelab/index.html) |
+<p align="center"><code>▶ <a href="nixos-homelab/index.html">nixos-homelab/index.html</a></code> &nbsp;·&nbsp; <code><a href="nixos-homelab/">chapters &amp; notes</a></code></p>
 
-## `[ OPEN ONE ]`
+<br>
 
-1. Open the talk's folder and its `index.html`.
-2. Download it (**⋯ → Download** or **Download raw file**).
-3. Open the file in Chrome, Edge, Firefox or Safari. It runs fully offline.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/keys-dark.png">
+  <img alt="Presenting: → / Space / PageDown / clicker = next, ← / PageUp = previous, S = speaker view, F = fullscreen, B = black screen, L = laser pointer, M = reduce motion, Esc = back to editor." src=".github/readme/keys-light.png" width="100%">
+</picture>
 
-`# GitHub shows the .html as source code; it only becomes slides once it's opened in a browser.`
+> [!TIP]
+> **To open a talk**, download its `index.html` (**⋯ → Download**) and open it in any modern browser. It runs fully offline.
+> GitHub only shows the file as source code.
 
-## `[ PRESENTING ]`
+<br>
 
-| Input | Does |
-|:--|:--|
-| `→` · `PageDown` · `Space` · clicker | next slide |
-| `←` · `PageUp` | previous slide |
-| `S` | speaker view: timer, next slide, notes |
-| `F` | fullscreen |
-| `B` | black screen |
-| `L` | laser pointer |
-| `M` | reduce motion |
-| `Esc` | stop presenting and go back to the editor |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/style-dark.png">
+  <img alt="House style: Fraunces Black for titles, Instrument Sans for body, JetBrains Mono for labels. host ❯ command kickers, [ SECTION ] labels, # asides, chapter footers, an own palette per talk, things draw themselves." src=".github/readme/style-light.png" width="100%">
+</picture>
 
-Talks that include mouse navigation also take **left click** = next, **right click** = previous, and the
-mouse's **side buttons** = back / forward. Each talk's README says whether it does.
+<details>
+<summary><b>Adding a talk</b></summary>
+<br>
 
-## `[ EDITING ]`
+1. Make a folder `kebab-case-name/` holding the deck as `index.html` and a short `README.md`
+   (copy [`nixos-homelab/README.md`](nixos-homelab/README.md)).
+2. Add its card under the last one, numbered `02`, `03`, …, in the same style: cover slide on the left, title,
+   one-line description, slide and chapter count, and the talk's own palette.
 
-Open `index.html`, press `Esc`, edit, then save with `⌘S` / `Ctrl+S`. The file rewrites itself, or
-downloads an updated copy in browsers that can't write files in place. The slides are plain JSON inside
-the `bento-doc` script block.
+</details>
 
-## `[ HOUSE STYLE ]`
+<details>
+<summary><b>Editing a deck</b></summary>
+<br>
 
-Every talk shares the same type and structure. Each one gets **its own colours**.
+Open `index.html`, press `Esc` to reach the editor, and save with `⌘S` / `Ctrl+S`. The file rewrites itself,
+or downloads an updated copy in browsers that can't write files in place. The slides are plain JSON inside the
+`bento-doc` script block.
 
-| Element | Style |
-|:--|:--|
-| Titles | **Fraunces Black**: a short sentence ending in a full stop. `What's coming.` |
-| Body | **Instrument Sans** |
-| Labels, code, captions | **JetBrains Mono** |
-| Kicker | a shell prompt: `host ❯ command`, e.g. `thalamus ❯ cat agenda.md` |
-| Section labels | bracketed caps: `[ WORRY ]` `[ ANSWER ]` `[ HOW ]` |
-| Asides | code comments: `# the mini pc that runs it all` |
-| Footer | chapter `NN — NAME`, page `NN / NN`, a progress bar split per chapter |
-| Background | the chapter number as a huge faint numeral |
-| Motion | morph transitions between slides; things that *happen* draw themselves (strike-throughs, checks, marching dashes) |
+</details>
 
-## `[ ADDING A TALK ]`
+<br>
 
-1. Make a folder `kebab-case-name/` holding `index.html` and a short `README.md` (copy
-   [`nixos-homelab/README.md`](nixos-homelab/README.md)).
-2. Add a row to **`[ TALKS ]`**, using the next number, with an image in `.github/readme/` that matches the
-   others (the row shows the talk's own palette as swatches).
-
-## `[ CREDITS ]`
-
-Built with [Bento Slides](https://bento.page) (MIT). Fonts: Fraunces, Instrument Sans and JetBrains Mono,
-all under the SIL Open Font License 1.1. The README images are those fonts converted to outlines.
+<sub>Built with <a href="https://bento.page">Bento Slides</a> (MIT) · Fraunces, Instrument Sans and JetBrains Mono under the SIL Open Font License 1.1 · <code># EOF</code></sub>
