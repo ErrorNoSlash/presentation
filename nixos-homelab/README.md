@@ -1,41 +1,31 @@
-<a href="../">`❮ presentations`</a>
+<p><a href="../"><code>❮ presentations</code></a></p>
 
-# NixOS Homelab
+<p align="center">
+  <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-hero-m-dark.svg"><source media="(max-width: 600px)" srcset="../assets/nixos-homelab-hero-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-hero-dark.svg"><img src="../assets/nixos-homelab-hero-light.svg" alt="thalamus ❯ cat README.md — NixOS Homelab. One Blackview mini PC running NixOS from a flake: 29 containers, Matrix on k3s, and only two doors in from the network." width="100%"></picture>
+</p>
 
-`thalamus ❯ cat README.md`
+<p align="center"><a href="index.html"><code>▶ index.html</code></a> &nbsp;·&nbsp; <code>22 slides</code> &nbsp;·&nbsp; <code>8 chapters</code></p>
 
-A 22-slide talk about my homelab: one Blackview MP60 mini PC (`thalamus`) running NixOS 26.05 from a
-flake, 29 Docker containers, Matrix on k3s, and only two doors into it from the network.
+<p align="center">
+  <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-gallery-m-dark.svg"><source media="(max-width: 600px)" srcset="../assets/nixos-homelab-gallery-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-gallery-dark.svg"><img src="../assets/nixos-homelab-gallery-light.svg" alt="Slides: 3 The whole lab on one page.; 7 Every rebuild is a generation.; 8 NixOS runs the host. Docker runs the apps.; 17 Door two: Minecraft.; 19 Every worry gets an answer.; 21 What I’d take away." width="100%"></picture>
+</p>
 
-**[`▶ index.html`](index.html)**: download it and open it in a browser.
+<p align="center">
+  <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-chapters-m-dark.svg"><source media="(max-width: 600px)" srcset="../assets/nixos-homelab-chapters-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-chapters-dark.svg"><img src="../assets/nixos-homelab-chapters-light.svg" alt="Chapters: 00 Overview, p.03; 01 The box, p.04; 02 What is NixOS, p.05–07; 03 The stack, p.08–12; 04 Two doors, p.13–17; 05 Messages &amp; safety, p.18–19; 06 Uptime, p.20; 07 Wrap-up, p.21–22" width="100%"></picture>
+</p>
 
-## `[ CHAPTERS ]`
+<p align="center">
+  <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-mouse-m-dark.svg"><source media="(max-width: 600px)" srcset="../assets/nixos-homelab-mouse-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-mouse-dark.svg"><img src="../assets/nixos-homelab-mouse-light.svg" alt="Mouse: Left click = Next; Right click = Previous; Side → = Next; Side ← = Previous. # off in laser mode (L), on links and buttons, and while dragging" width="100%"></picture>
+</p>
 
-| | Chapter | | Slides |
-|:--|:--|:--|--:|
-| `00` | **Overview** | `# the whole lab on one page` | 3 |
-| `01` | **The box** | `# blackview mp60, the mini pc that runs it all` | 4 |
-| `02` | **What is NixOS** | `# one flake in git, every rebuild a generation` | 5–7 |
-| `03` | **The stack** | `# 29 containers, what they replace, the databases` | 8–12 |
-| `04` | **Two doors** | `# web + minecraft, guarded by anubis + authentik` | 13–17 |
-| `05` | **Messages & safety** | `# matrix, ntfy, and the threat model` | 18–19 |
-| `06` | **Uptime** | `# does it actually stay up?` | 20 |
-| `07` | **Wrap-up** | `# takeaways and questions` | 21–22 |
+> [!TIP]
+> This deck also takes every key from the [main README](../README.md): arrows, `Space`, `S` for speaker view,
+> `B` for a black screen, `L` for the laser pointer.
 
-## `[ PRESENTING ]`
+<p align="center">
+  <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-palette-m-dark.svg"><source media="(max-width: 600px)" srcset="../assets/nixos-homelab-palette-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-palette-dark.svg"><img src="../assets/nixos-homelab-palette-light.svg" alt="Palette: navy #0D1B2E, nix blue #5277C3, light blue #7EBAE4, sky #C9E1F3, cream #F2F0EA" width="100%"></picture>
+</p>
 
-All the keys from the [main README](../README.md) work, and this deck also has **mouse navigation**:
-
-| Mouse | Does |
-|:--|:--|
-| left click | next slide |
-| right click | previous slide (no context menu) |
-| side button **forward** / **back** | next / previous slide |
-
-`# off in laser mode (L), on links and buttons, and while dragging; side buttons stay on in laser mode`
-
-## `[ PALETTE ]`
-
-`#0D1B2E` navy · `#5277C3` nix blue · `#7EBAE4` light blue · `#C9E1F3` sky · `#F2F0EA` cream
-
-`# no secrets, keys or private addresses are included in this deck`
+<p align="center">
+  <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-footer-m-dark.svg"><source media="(max-width: 600px)" srcset="../assets/nixos-homelab-footer-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="../assets/nixos-homelab-footer-dark.svg"><img src="../assets/nixos-homelab-footer-light.svg" alt="thalamus ❯ exit — 22 slides, nov 2026" width="100%"></picture>
+</p>

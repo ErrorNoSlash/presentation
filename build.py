@@ -39,12 +39,33 @@ TALKS = [
     dict(
         slug='nixos-homelab',
         title='NixOS Homelab',
+        host='thalamus',
         date='nov 2026',
+        slides=22,
         desc='One Blackview mini PC running NixOS from a flake: 29 containers, '
              'Matrix on k3s, and only two doors in from the network.',
         chips=['22 slides', '8 chapters', 'nixos · docker · k3s'],
-        palette=['#0D1B2E', '#5277C3', '#7EBAE4', '#C9E1F3', '#F2F0EA'],
-        thumbs=['nixos-homelab-1.jpg', 'nixos-homelab-2.jpg', 'nixos-homelab-3.jpg', 'nixos-homelab-4.jpg'],
+        palette=[('#0D1B2E', 'navy'), ('#5277C3', 'nix blue'), ('#7EBAE4', 'light blue'),
+                 ('#C9E1F3', 'sky'), ('#F2F0EA', 'cream')],
+        # the talk's own page shows the real slides: (thumbnail, page, title)
+        cover='nixos-homelab-01.jpg',
+        gallery=[('nixos-homelab-03', 3, 'The whole lab on one page.'),
+                 ('nixos-homelab-07', 7, 'Every rebuild is a generation.'),
+                 ('nixos-homelab-08', 8, 'NixOS runs the host. Docker runs the apps.'),
+                 ('nixos-homelab-17', 17, 'Door two: Minecraft.'),
+                 ('nixos-homelab-19', 19, 'Every worry gets an answer.'),
+                 ('nixos-homelab-21', 21, 'What I’d take away.')],
+        chapters=[('00', 'Overview', 'the whole lab on one page', '03'),
+                  ('01', 'The box', 'blackview mp60, the mini pc that runs it all', '04'),
+                  ('02', 'What is NixOS', 'one flake in git, every rebuild a generation', '05–07'),
+                  ('03', 'The stack', '29 containers, what they replace, the databases', '08–12'),
+                  ('04', 'Two doors', 'web + minecraft, guarded by anubis + authentik', '13–17'),
+                  ('05', 'Messages & safety', 'matrix, ntfy, and the threat model', '18–19'),
+                  ('06', 'Uptime', 'does it actually stay up?', '20'),
+                  ('07', 'Wrap-up', 'takeaways and questions', '21–22')],
+        mouse=[(['Left click'], 'Next', ''), (['Right click'], 'Previous', 'no context menu'),
+               (['Side →'], 'Next', 'forward button'), (['Side ←'], 'Previous', 'back button')],
+        mouse_note='# off in laser mode (L), on links and buttons, and while dragging',
     ),
 ]
 
@@ -278,6 +299,86 @@ def slide(uri, x, y, w, rot, cls, delay, clip_id, origin=None):
             f'<g filter="url(#sh)"><image href="{uri}" x="{x}" y="{y}" width="{w}" height="{h:.1f}" clip-path="url(#{clip_id})"/></g></g>'
             f'<clipPath id="{clip_id}"><rect x="{x}" y="{y}" width="{w}" height="{h:.1f}" rx="{w * 0.022:.1f}"/></clipPath>')
 
+def _r(x, y, w, h, fill, rx=0, op=1, extra=''):
+    o = f' opacity="{op}"' if op != 1 else ''
+    return f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="{rx}" fill="{fill}"{o}{extra}/>'
+
+def _bars(x, y, widths, h, fill, gap=14, op=1):
+    out = []
+    for w_ in widths:
+        out.append(_r(x, y, w_, h, fill, h / 2, op)); x += w_ + gap
+    return ''.join(out)
+
+def mock_content(kind, talk, uid):
+    """A made-up slide in the talk's palette, composed like the decks' own (1280x720 units)."""
+    P = [c for c, _ in talk['palette']]
+    navy, blue, light, sky, cream = (P + P)[:5]
+    o = []
+    foot = lambda ink, on: ''.join(_r(96 + i * 156.6, 682, 148.6, 4, ink if i == on else ink, 2, 1 if i == on else 0.25) for i in range(7))
+    if kind == 'cover':
+        o.append(_r(0, 0, 1280, 720, navy))
+        o.append(_bars(24, 10, [180, 120, 220, 150, 200, 130, 170], 9, light, 22, 0.35))
+        o.append(_bars(96, 58, [96], 13, light) + _bars(206, 58, [168], 13, cream, op=0.85))
+        o.append(f'<circle cx="1050" cy="64" r="6" fill="{light}"/>' + _bars(1064, 58, [120], 13, light, op=0.6))
+        words = talk['title'].upper().split()
+        title, lead = words[-1], ' '.join(words[:-1])     # the last word goes huge, like the decks' covers
+        size = min(300, 1090 / max(W(title, 'serif', 1), 1))
+        y = 300 + size * 0.7
+        if lead: o.append(T(lead, 'serif', 46, 98, 120, cream)[0])
+        for k, (c, dy) in enumerate([(blue, -0.62), (light, -0.32)]):   # the cover's stacked, cut-off title
+            band = f'm{uid}{k}'
+            o.append(f'<clipPath id="{band}"><rect x="0" y="{y + dy * size - size * 0.72:.0f}" width="1280" height="{size * 0.3:.0f}"/></clipPath>')
+            o.append(f'<g clip-path="url(#{band})">' + T(title, 'serif', size, 92, y + dy * size, c)[0] + '</g>')
+        o.append(T(title, 'serif', size, 92, y, sky)[0])
+        o.append(_bars(96, y + 40, [380], 16, cream, op=0.9) + _bars(96, y + 66, [280], 16, cream, op=0.9) + _bars(96, y + 96, [190], 10, light, op=0.6))
+        o.append(_r(930, 486, 350, 154, sky))
+        o.append(f'<path d="M 978 512 v 52 m -19 -19 l 19 19 l 19 -19" fill="none" stroke="{navy}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>')
+        o.append(_bars(960, 600, [150], 10, navy, op=0.6))
+        o.append(_r(0, 640, 1280, 80, light))
+        o.append(_bars(-30, 672, [150, 210, 170, 240, 190, 160, 230], 16, navy, 34, 0.85))
+    elif kind == 'grid':
+        o.append(_r(0, 0, 1280, 720, navy))
+        o.append(_bars(96, 50, [96], 12, light) + _bars(206, 50, [150], 12, cream, op=0.8))
+        o.append(_r(96, 88, 560, 46, cream, 10))
+        for r in range(2):
+            for c in range(3):
+                x, y = 96 + c * 196, 200 + r * 172
+                fill = light if (r + c) % 3 else blue
+                o.append(_r(x, y, 180, 152, fill, 10))
+                o.append(_r(x + 18, y + 20, 44, 58, navy, 6, 0.9))
+                o.append(_bars(x + 18, y + 96, [120], 11, navy, op=0.7) + _bars(x + 18, y + 118, [90], 9, navy, op=0.45))
+        o.append(f'<rect x="712" y="190" width="472" height="342" rx="12" fill="none" stroke="{light}" stroke-width="3" stroke-dasharray="14 10" opacity="0.8"/>')
+        for i in range(3):
+            o.append(_r(740, 222 + i * 96, 416, 72, blue if i == 1 else '#ffffff', 10, 1 if i == 1 else 0.08))
+            o.append(_bars(762, 250 + i * 96, [180, 90], 14, cream, op=0.75))
+        o.append(_r(96, 560, 1088, 64, cream, 10, 0.92) + _bars(124, 586, [260, 140], 14, navy, op=0.7))
+        o.append(foot(light, 2))
+    else:  # 'list'
+        o.append(_r(0, 0, 1280, 720, sky))
+        o.append(_bars(96, 50, [96], 12, blue) + _bars(206, 50, [150], 12, navy, op=0.7))
+        o.append(_r(96, 88, 640, 46, navy, 10))
+        for i in range(5):
+            y = 168 + i * 96
+            o.append(_r(96, y, 1088, 80, '#ffffff', 14, 0.5))
+            o.append(_bars(124, y + 34, [28], 12, blue))
+            o.append(_bars(170, y + 34, [210], 12, navy, op=0.45) + _r(166, y + 39, 218, 2.5, navy, 0, 0.7))
+            o.append(''.join(f'<circle cx="{404 + k * 12}" cy="{y + 40}" r="2.6" fill="{blue}"/>' for k in range(6)))
+            o.append(_r(484, y + 10, 400, 60, navy, 10))
+            o.append(f'<circle cx="516" cy="{y + 40}" r="15" fill="{light}"/>'
+                     f'<path d="M 509 {y + 40} l 5 5 l 9 -10" fill="none" stroke="{navy}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>')
+            o.append(_bars(546, y + 32, [200 - i * 18], 16, cream))
+            o.append(_bars(912, y + 26, [230], 11, navy, op=0.55) + _bars(912, y + 46, [160], 11, navy, op=0.4))
+        o.append(foot(navy, 4))
+    return ''.join(o)
+
+def mock(kind, talk, x, y, w, rot, cls, delay, uid, origin=None):
+    h = w * 9 / 16; s_ = w / 1280
+    ox, oy = origin or (x + w / 2, y + h)
+    return (f'<g class="{cls}" style="{at(delay)};transform-origin:{ox:.0f}px {oy:.0f}px;--r:{rot}deg;transform:rotate({rot}deg)">'
+            f'<g filter="url(#sh)"><g transform="translate({x:.1f} {y:.1f}) scale({s_:.5f})">'
+            f'<clipPath id="k{uid}"><rect width="1280" height="720" rx="28"/></clipPath>'
+            f'<g clip-path="url(#k{uid})">{mock_content(kind, talk, uid)}</g></g></g></g>')
+
 def shadow(t):
     a = '0.28' if t is THEMES['light'] else '0.7'
     return (f'<defs><filter id="sh" x="-20%" y="-20%" width="140%" height="160%">'
@@ -310,10 +411,9 @@ def banner(t, mobile):
             p, _ = T(line, 'sans', 30, M, 370 + i * 44, t['ink'] if i == 0 else t['muted'], cls='rise', style=at(0.95 + i * 0.05))
             out.append(p)
         y0 = 370 + len(sub) * 44 + 40
-        thumbs = TALKS[0]['thumbs']
-        fan = [(thumbs[3 % len(thumbs)], 150, y0 + 40, 400, 8), (thumbs[2 % len(thumbs)], 110, y0 + 20, 400, 2), (thumbs[0], 70, y0, 400, -5)]
-        for i, (name, x, y, sw, rot) in enumerate(fan):
-            out.append(slide(thumb_uri(name), x, y, sw, rot, 'fan', 1.1 + i * 0.12, f'c{i}', (x + sw / 2, y + sw * 9 / 16 + 40)))
+        fan = [('list', 150, y0 + 40, 400, 8), ('grid', 110, y0 + 20, 400, 2), ('cover', 70, y0, 400, -5)]
+        for i, (kind, x, y, sw, rot) in enumerate(fan):
+            out.append(mock(kind, TALKS[0], x, y, sw, rot, 'fan', 1.1 + i * 0.12, f'c{i}', (x + sw / 2, y + sw * 9 / 16 + 40)))
         out.append(T('00 — INDEX', 'monob', 18, M, 912, t['muted'], ls=2.5)[0])
         out.append(T(AUTHOR.upper(), 'monob', 18, w - M, 912, t['muted'], ls=2.5, anchor='end')[0])
         out.append(segs(M, 934, w - 2 * M, 4, 1, t, 1.6))
@@ -331,10 +431,9 @@ def banner(t, mobile):
         for i, line in enumerate(sub):
             p, _ = T(line, 'sans', 25, M, 410 + i * 36, t['ink'] if i == 0 else t['muted'], cls='rise', style=at(0.95 + i * 0.05))
             out.append(p)
-        thumbs = TALKS[0]['thumbs']
-        fan = [(thumbs[3 % len(thumbs)], 770, 150, 430, 8), (thumbs[2 % len(thumbs)], 730, 120, 430, 2), (thumbs[0], 690, 96, 430, -5)]
-        for i, (name, x, y, sw, rot) in enumerate(fan):
-            out.append(slide(thumb_uri(name), x, y, sw, rot, 'fan', 0.9 + i * 0.12, f'c{i}', (x + sw / 2, y + sw * 9 / 16 + 60)))
+        fan = [('list', 770, 150, 430, 8), ('grid', 730, 120, 430, 2), ('cover', 690, 96, 430, -5)]
+        for i, (kind, x, y, sw, rot) in enumerate(fan):
+            out.append(mock(kind, TALKS[0], x, y, sw, rot, 'fan', 0.9 + i * 0.12, f'c{i}', (x + sw / 2, y + sw * 9 / 16 + 60)))
         out.append(T('00 — INDEX', 'monob', 15, M, 536, t['muted'], ls=2)[0])
         out.append(T(AUTHOR.upper(), 'monob', 15, w - M, 536, t['muted'], ls=2, anchor='end')[0])
         out.append(segs(M, 554, w - 2 * M, 7, 1, t, 1.5))
@@ -360,11 +459,10 @@ def talk_card(n, talk, t, mobile):
     w = 640 if mobile else 1280; M = 40 if mobile else 80
     out, css = [shadow(t)], ''
     out.append(f'<rect class="wipe" style="{at(0.05)}" x="0" y="0" width="{w}" height="2" fill="{t["rule"]}"/>')
-    th = talk['thumbs']
     if mobile:
         sw = w - 2 * M; sy = 64
-        out.append(slide(thumb_uri(th[1 % len(th)]), M, sy + 10, sw, -3.5, 'back', 0.2, 'b0'))
-        out.append(slide(thumb_uri(th[0]), M, sy, sw, 0, 'front', 0.1, 'f0'))
+        out.append(mock('grid', talk, M, sy + 10, sw, -3.5, 'back', 0.2, 'b0'))
+        out.append(mock('cover', talk, M, sy, sw, 0, 'front', 0.1, 'f0'))
         y = sy + sw * 9 / 16 + 84
         out.append(T(f'{n:02d}', 'monob', 22, M, y, t['muted'], cls='rise', style=at(0.5))[0])
         out.append(T(f'· {talk["date"]}', 'mono', 22, M + 40, y, t['muted'], cls='rise', style=at(0.5))[0])
@@ -376,7 +474,7 @@ def talk_card(n, talk, t, mobile):
             out.append(T(line, 'sans', 28, M, y + i * 42, t['muted'], cls='rise', style=at(0.85 + i * 0.05))[0]); last = y + i * 42
         c, y = chips_row(talk['chips'], M, last + 34, 21, t, 1.1, w - 2 * M)
         out.append(c); y += 34
-        for i, col in enumerate(talk['palette']):
+        for i, (col, _) in enumerate(talk['palette']):
             out.append(f'<rect class="pop" style="{at(1.35 + i * 0.07)}" x="{M + i * 50}" y="{y:.0f}" width="38" height="38" rx="10" fill="{col}" stroke="{t["rule"]}" stroke-width="1.6"/>')
         y += 100
         out.append(f'<path class="rise" style="{at(1.7)}" d="M {M} {y - 22} l 18 11 l -18 11 z" fill="{t["ink"]}"/>')
@@ -385,8 +483,8 @@ def talk_card(n, talk, t, mobile):
         out.append(f'<rect x="0" y="{h - 2}" width="{w}" height="2" fill="{t["rule"]}"/>')
     else:
         h = 470; sw = 590; sx, sy = M, 62
-        out.append(slide(thumb_uri(th[1 % len(th)]), sx, sy + 12, sw, -3.5, 'back', 0.2, 'b0'))
-        out.append(slide(thumb_uri(th[0]), sx, sy, sw, 0, 'front', 0.1, 'f0'))
+        out.append(mock('grid', talk, sx, sy + 12, sw, -3.5, 'back', 0.2, 'b0'))
+        out.append(mock('cover', talk, sx, sy, sw, 0, 'front', 0.1, 'f0'))
         x = M + sw + 64; tw = w - M - x
         out.append(T(f'{n:02d}', 'monob', 18, x, 92, t['muted'], cls='rise', style=at(0.45))[0])
         out.append(T(f'· {talk["date"]}', 'mono', 18, x + 32, 92, t['muted'], cls='rise', style=at(0.45))[0])
@@ -398,7 +496,7 @@ def talk_card(n, talk, t, mobile):
             out.append(T(line, 'sans', 21, x, y + i * 32, t['muted'], cls='rise', style=at(0.8 + i * 0.05))[0]); last = y + i * 32
         c, y = chips_row(talk['chips'], x, last + 28, 16, t, 1.05, tw)
         out.append(c); y += 28
-        for i, col in enumerate(talk['palette']):
+        for i, (col, _) in enumerate(talk['palette']):
             out.append(f'<rect class="pop" style="{at(1.3 + i * 0.07)}" x="{x + i * 42}" y="{y:.0f}" width="30" height="30" rx="8" fill="{col}" stroke="{t["rule"]}" stroke-width="1.5"/>')
         out.append(T('# its own palette', 'mono', 16, x + len(talk['palette']) * 42 + 10, y + 21, t['muted'], cls='rise', style=at(1.6))[0])
         y += 78
@@ -413,33 +511,43 @@ def talk_card(n, talk, t, mobile):
     label = f'{n:02d} — {talk["title"]}: {talk["desc"]} ' + ' · '.join(talk['chips'])
     return svg(w, h, t, ''.join(out), label, css)
 
-def keys(t, mobile):
+def keys(t, mobile, items=None, label='[ PRESENTING ]', note=None, press='→'):
+    items = items or KEYS
     w = 640 if mobile else 1280; M = 40 if mobile else 80
-    cols = 1 if mobile else 4
     size = 22 if mobile else 17
+    capH = 54 if mobile else 48
+    def need(item):   # width one entry takes: its keycaps, then the longer of label and note
+        ks, what, sub = item
+        caps = sum(max(capH, W(k, 'monob', size) + size * 1.3) + 10 for k in ks)
+        return caps + 6 + max(W(what, 'sans', size + 5), W(sub, 'mono', size - 3) if sub else 0) + 24
+    cols = 1 if mobile else (4 if items is KEYS or max(need(i) for i in items) <= (w - 2 * M) / 4 else 2)
     out, css = [], ''
-    out.append(T('[ PRESENTING ]', 'monob', size - 2, M, 64, t['muted'], ls=2.4, cls='rise', style=at(0.05))[0])
-    colw = (w - 2 * M) / cols; rowh = 90 if mobile else 84; capH = 54 if mobile else 48
-    for i, (ks, what, note) in enumerate(KEYS):
+    out.append(T(label, 'monob', size - 2, M, 64, t['muted'], ls=2.4, cls='rise', style=at(0.05))[0])
+    colw = (w - 2 * M) / cols; rowh = 90 if mobile else 84
+    for i, (ks, what, sub) in enumerate(items):
         x0 = M + (i % cols) * colw; y0 = 110 + (i // cols) * rowh
         d = 0.15 + i * 0.07
         x = x0
         for k in ks:
             kw = max(capH, W(k, 'monob', size) + size * 1.3)
-            press = ' press' if k == '→' else ''
-            out.append(f'<g class="pop" style="{at(d)}"><g class="cap{press}">'
+            pr = ' press' if k == press else ''
+            out.append(f'<g class="pop" style="{at(d)}"><g class="cap{pr}">'
                        f'<rect x="{x:.1f}" y="{y0 + 4}" width="{kw:.1f}" height="{capH}" rx="10" fill="{t["keyedge"]}"/>'
                        f'<rect class="top" x="{x:.1f}" y="{y0}" width="{kw:.1f}" height="{capH}" rx="10" fill="{t["card"]}" stroke="{t["rule"]}" stroke-width="1.5"/>'
                        + T(k, 'monob', size, x + kw / 2, y0 + capH / 2 + size * 0.36, t['ink'], anchor='middle', cls='top')[0] + '</g></g>')
             x += kw + 10
-        ty = y0 + capH / 2 + (size * 0.4 if not note else -2)
+        ty = y0 + capH / 2 + (size * 0.4 if not sub else -2)
         out.append(T(what, 'sans', size + 5, x + 6, ty, t['ink'], cls='rise', style=at(d + 0.08))[0])
-        if note: out.append(T(note, 'mono', size - 3, x + 6, ty + size + 4, t['muted'], cls='rise', style=at(d + 0.1))[0])
-    h = 110 + ((len(KEYS) + cols - 1) // cols) * rowh + 16
+        if sub: out.append(T(sub, 'mono', size - 3, x + 6, ty + size + 4, t['muted'], cls='rise', style=at(d + 0.1))[0])
+    h = 110 + ((len(items) + cols - 1) // cols) * rowh + 16
+    if note:
+        for j, line in enumerate(wrap(note, 'mono', size - 1, w - 2 * M)):
+            out.append(T(line, 'mono', size - 1, M, h - 4 + j * (size + 8), t['muted'], cls='rise', style=at(0.15 + len(items) * 0.07))[0])
+        h += 30 + (size + 8) * len(wrap(note, 'mono', size - 1, w - 2 * M))
     # the → key gets pressed every few seconds, like a presenter moving on
     css += ('.press .top{animation:press 4.2s cubic-bezier(.4,0,.2,1) 2.4s infinite}'
             '@keyframes press{0%,86%,100%{transform:none}90%,94%{transform:translateY(4px)}}')
-    return svg(w, h, t, ''.join(out), 'Presenting: ' + '; '.join(f'{" / ".join(k)} = {wh}' for k, wh, _ in KEYS), css)
+    return svg(w, h, t, ''.join(out), 'Presenting: ' + '; '.join(f'{" / ".join(k)} = {wh}' for k, wh, _ in items) + (f'. {note}' if note else ''), css)
 
 def house_style(t, mobile):
     w = 640 if mobile else 1280; M = 40 if mobile else 80
@@ -481,30 +589,183 @@ def house_style(t, mobile):
     return svg(w, h, t, ''.join(out), 'House style: Fraunces Black for titles, Instrument Sans for body copy, JetBrains Mono for labels. '
                + '; '.join(f'{c}: {w_}' for c, w_ in STYLE_RULES), css)
 
-def footer(t, mobile):
+def footer(t, mobile, host='presentations', left=None, right=None):
     w = 640 if mobile else 1280; M = 40 if mobile else 80
     size = 22 if mobile else 18
     out, css = [], ''
-    k, kc = typed('presentations', 'exit', M, 60, size, t, start=0.4, per=0.09); out.append(k); css += kc
+    k, kc = typed(host, 'exit', M, 60, size, t, start=0.4, per=0.09); out.append(k); css += kc
     y = 112 if mobile else 108
-    out.append(T(f'{len(TALKS):02d} — TALKS', 'monob', size - 3, M, y, t['muted'], ls=2.4)[0])
-    out.append(T(f'{AUTHOR.upper()} · {YEAR}', 'monob', size - 3, w - M, y, t['muted'], ls=2.4, anchor='end')[0])
+    left = left or f'{len(TALKS):02d} — TALKS'; right = right or f'{AUTHOR.upper()} · {YEAR}'
+    out.append(T(left, 'monob', size - 3, M, y, t['muted'], ls=2.4)[0])
+    out.append(T(right, 'monob', size - 3, w - M, y, t['muted'], ls=2.4, anchor='end')[0])
     out.append(segs(M, y + 20, w - 2 * M, 4 if mobile else 7, 4 if mobile else 7, t, 0.2))
-    return svg(w, y + 48, t, ''.join(out), f'presentations ❯ exit — {AUTHOR}, {YEAR}', css)
+    return svg(w, y + 48, t, ''.join(out), f'{host} ❯ exit — {left}, {right}', css)
+
+CREDITS = [  # (label, name, licence)
+    ('BUILT WITH', 'Bento Slides', 'MIT'),
+    ('TITLES', 'Fraunces', 'OFL 1.1'),
+    ('BODY', 'Instrument Sans', 'OFL 1.1'),
+    ('LABELS', 'JetBrains Mono', 'OFL 1.1'),
+]
+
+def credits(t, mobile):
+    """The credits, set like the decks' chips: a label above each, the licence beside the name."""
+    w = 640 if mobile else 1280; M = 40 if mobile else 80
+    size = 21 if mobile else 16
+    out = [T('[ CREDITS ]', 'monob', size - 1, M, 52, t['muted'], ls=2.4, cls='rise', style=at(0.05))[0]]
+    cols = 2 if mobile else 4; gap = 18
+    cw = (w - 2 * M - gap * (cols - 1)) / cols; ch = size * 4.6
+    for i, (lab, name, lic) in enumerate(CREDITS):
+        x = M + (i % cols) * (cw + gap); y = 84 + (i // cols) * (ch + gap)
+        d = 0.15 + i * 0.09
+        out.append(f'<g class="pop" style="{at(d)}">'
+                   f'<rect x="{x:.1f}" y="{y:.1f}" width="{cw:.1f}" height="{ch:.1f}" rx="12" fill="{t["card"]}" stroke="{t["rule"]}" stroke-width="1.5"/>'
+                   + T(lab, 'monob', size - 4, x + size, y + size * 1.55, t['muted'], ls=1.8)[0]
+                   + T(name, 'serif' if i == 0 else ('sans' if lab != 'LABELS' else 'mono'), size + 7, x + size, y + size * 3.35,
+                       t['ink'])[0]
+                   + T(lic, 'mono', size - 3, x + cw - size, y + size * 1.55, t['muted'], anchor='end')[0] + '</g>')
+    rows = (len(CREDITS) + cols - 1) // cols
+    h = 84 + rows * (ch + gap) + 18
+    label = 'Credits: ' + '; '.join(f'{n} ({l})' for _, n, l in CREDITS)
+    return svg(w, int(h), t, ''.join(out), label)
+
+# ─── a talk's own page: the real slides ─────────────────────────────────────
+def photo(name, x, y, w, rot, cls, delay, uid, origin=None, small=False):
+    """A real screenshot of the deck, framed like the mock slides."""
+    f = name + ('-s' if small else '') + ('.jpg' if not name.endswith('.jpg') else '')
+    uri = thumb_uri(f)
+    h = w * 9 / 16
+    ox, oy = origin or (x + w / 2, y + h)
+    return (f'<g class="{cls}" style="{at(delay)};transform-origin:{ox:.0f}px {oy:.0f}px;--r:{rot}deg;transform:rotate({rot}deg)">'
+            f'<g filter="url(#sh)"><image href="{uri}" x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" clip-path="url(#p{uid})"/></g></g>'
+            f'<clipPath id="p{uid}"><rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="{w * 0.02:.1f}"/></clipPath>')
+
+ANIM_SLIDES = ('.front{animation:wipe .7s cubic-bezier(.65,0,.35,1) both}'
+               '.back{animation:back .9s cubic-bezier(.34,1.3,.64,1) both}'
+               '@keyframes back{from{opacity:0;transform:rotate(0)}to{opacity:1;transform:rotate(var(--r))}}')
+
+def talk_hero(n, talk, t, mobile):
+    w = 640 if mobile else 1280; M = 40 if mobile else 80
+    out, css = [shadow(t)], ANIM_SLIDES
+    cover = talk['cover'].replace('.jpg', '')
+    second = talk['gallery'][2][0] if len(talk['gallery']) > 2 else cover
+    if mobile:
+        k, kc = typed(talk['host'], 'cat README.md', M, 70, 22, t); out.append(k); css += kc
+        out.append(T(f'{n:02d} — {talk["date"].upper()}', 'monob', 18, M, 128, t['muted'], ls=2.4, cls='rise', style=at(0.3))[0])
+        lines = wrap(talk['title'] + '.', 'serif', 88, w - 2 * M)
+        for i, line in enumerate(lines):
+            out.append(T(line, 'serif', 88, M - 3, 228 + i * 92, t['ink'], cls='wipe', style=at(0.5 + i * 0.15), ls=-1)[0])
+        y = 228 + (len(lines) - 1) * 92 + 64
+        for i, line in enumerate(wrap(talk['desc'], 'sans', 28, w - 2 * M)):
+            out.append(T(line, 'sans', 28, M, y + i * 42, t['ink'] if i == 0 else t['muted'], cls='rise', style=at(0.85 + i * 0.05))[0]); last = y + i * 42
+        c, y = chips_row(talk['chips'], M, last + 34, 21, t, 1.05, w - 2 * M); out.append(c)
+        sy = y + 60; sw = w - 2 * M
+        out.append(photo(second, M, sy + 14, sw, 3.5, 'back', 0.9, 'b'))
+        out.append(photo(cover, M, sy, sw, 0, 'front', 0.8, 'f'))
+        h = int(sy + sw * 9 / 16 + 70)
+    else:
+        k, kc = typed(talk['host'], 'cat README.md', M, 80, 20, t); out.append(k); css += kc
+        out.append(T(f'{n:02d} — {talk["date"].upper()}', 'monob', 15, M, 134, t['muted'], ls=2.2, cls='rise', style=at(0.3))[0])
+        lines = wrap(talk['title'] + '.', 'serif', 96, 560)
+        for i, line in enumerate(lines):
+            out.append(T(line, 'serif', 96, M - 3, 232 + i * 98, t['ink'], cls='wipe', style=at(0.5 + i * 0.15), ls=-1.2)[0])
+        y = 232 + (len(lines) - 1) * 98 + 62
+        for i, line in enumerate(wrap(talk['desc'], 'sans', 22, 540)):
+            out.append(T(line, 'sans', 22, M, y + i * 33, t['ink'] if i == 0 else t['muted'], cls='rise', style=at(0.85 + i * 0.05))[0]); last = y + i * 33
+        c, y = chips_row(talk['chips'], M, last + 30, 16, t, 1.05, 560); out.append(c)
+        sw = 560; sx = w - M - sw; sy = 110
+        out.append(photo(second, sx, sy + 16, sw, 4, 'back', 0.9, 'b'))
+        out.append(photo(cover, sx, sy, sw, 0, 'front', 0.8, 'f'))
+        h = int(max(y + 70, sy + sw * 9 / 16 + 80))
+    return svg(w, h, t, ''.join(out), f'{talk["host"]} ❯ cat README.md — {talk["title"]}. {talk["desc"]}', css)
+
+def gallery(talk, t, mobile):
+    w = 640 if mobile else 1280; M = 40 if mobile else 80
+    out, css = [shadow(t)], ANIM_SLIDES
+    size = 20 if mobile else 15
+    out.append(T('[ SLIDES ]', 'monob', size, M, 60, t['muted'], ls=2.4, cls='rise', style=at(0.05))[0])
+    cols = 2 if mobile else 3; gap = 20 if mobile else 28
+    sw = (w - 2 * M - gap * (cols - 1)) / cols; sh = sw * 9 / 16
+    cap = 2
+    rowh = sh + (26 + cap * 30 if mobile else 92)
+    for i, (name, page, title) in enumerate(talk['gallery']):
+        x = M + (i % cols) * (sw + gap); y = 92 + (i // cols) * rowh
+        d = 0.15 + i * 0.1
+        out.append(photo(name, x, y, sw, 0, 'front', d, f'g{i}', small=True))
+        ty = y + sh + (34 if mobile else 30)
+        out.append(T(f'{page:02d}', 'monob', size, x, ty, t['muted'], cls='rise', style=at(d + 0.3))[0])
+        for j, line in enumerate(wrap(title, 'sans', size + 3, sw - (44 if mobile else 36))[:cap]):
+            out.append(T(line, 'sans', size + 3, x + (44 if mobile else 36), ty + j * (size + 9), t['ink'], cls='rise', style=at(d + 0.35))[0])
+    rows = (len(talk['gallery']) + cols - 1) // cols
+    h = int(92 + rows * rowh + 10)
+    return svg(w, h, t, ''.join(out), 'Slides: ' + '; '.join(f'{p} {ti}' for _, p, ti in talk['gallery']), css)
+
+def chapters(talk, t, mobile):
+    w = 640 if mobile else 1280; M = 40 if mobile else 80
+    out, css = [], ''
+    size = 20 if mobile else 15
+    out.append(T('[ CHAPTERS ]', 'monob', size, M, 60, t['muted'], ls=2.4, cls='rise', style=at(0.05))[0])
+    rows = talk['chapters']; top = 90; rh = 104 if mobile else 66
+    # the agenda's walking highlight: a soft bar that steps down the rows
+    n = len(rows); per = 1.4; dur = per * n
+    keys_ = []
+    for i in range(n):
+        a = i / n * 100; b = (i + 0.78) / n * 100
+        keys_.append(f'{a:.2f}%,{b:.2f}%{{transform:translateY({i * rh}px)}}')
+    css += (f'.beam{{animation:beam {dur:.1f}s cubic-bezier(.65,0,.35,1) 1.8s infinite both}}'
+            f'@keyframes beam{{{"".join(keys_)}100%{{transform:translateY(0)}}}}')
+    out.append(f'<g class="rise" style="{at(1.6)}"><g class="beam"><rect x="{M - 16}" y="{top + 6}" width="{w - 2 * M + 32}" height="{rh - 12}" rx="12" '
+               f'fill="{t["faint"]}" stroke="{t["rule"]}" stroke-width="1.2"/>'
+               f'<rect x="{M - 8}" y="{top + rh * 0.3:.0f}" width="4" height="{rh * 0.4:.0f}" rx="2" fill="{t["ink"]}"/></g></g>')
+    for i, (num, title, desc, pages) in enumerate(rows):
+        y = top + i * rh; d = 0.12 + i * 0.07
+        out.append(f'<rect class="wipe" style="{at(d)}" x="0" y="{y}" width="{w}" height="1.5" fill="{t["rule"]}"/>')
+        if mobile:
+            out.append(T(num, 'monob', 18, M + 8, y + 44, t['muted'], cls='rise', style=at(d + 0.05))[0])
+            out.append(T(title.upper(), 'serif', 34, M + 56, y + 48, t['ink'], cls='wipe', style=at(d + 0.08))[0])
+            out.append(T(f'p.{pages}', 'monob', 18, w - M, y + 44, t['ink'], anchor='end', cls='rise', style=at(d + 0.1))[0])
+            line = wrap('# ' + desc, 'mono', 18, w - 2 * M - 56)[0]
+            out.append(T(line, 'mono', 18, M + 56, y + 82, t['muted'], cls='rise', style=at(d + 0.12))[0])
+        else:
+            out.append(T(num, 'monob', 14, M + 8, y + 30, t['muted'], cls='rise', style=at(d + 0.05))[0])
+            out.append(T(title.upper(), 'serif', 30, M + 56, y + 44, t['ink'], cls='wipe', style=at(d + 0.08))[0])
+            out.append(T('# ' + desc, 'mono', 16, 640, y + 40, t['muted'], cls='rise', style=at(d + 0.12))[0])
+            out.append(T(f'p.{pages}', 'monob', 16, w - M, y + 40, t['ink'], anchor='end', cls='rise', style=at(d + 0.1))[0])
+    h = top + n * rh
+    out.append(f'<rect class="wipe" style="{at(0.12 + n * 0.07)}" x="0" y="{h}" width="{w}" height="1.5" fill="{t["rule"]}"/>')
+    return svg(w, h + 24, t, ''.join(out), 'Chapters: ' + '; '.join(f'{a} {b}, p.{dd}' for a, b, _, dd in rows), css)
+
+def palette(talk, t, mobile):
+    w = 640 if mobile else 1280; M = 40 if mobile else 80
+    out = []
+    size = 20 if mobile else 15
+    out.append(T('[ PALETTE ]', 'monob', size, M, 60, t['muted'], ls=2.4, cls='rise', style=at(0.05))[0])
+    out.append(T('# this talk only; the next one gets its own', 'mono', size, w - M, 60, t['muted'], anchor='end', cls='rise', style=at(0.1))[0]
+               if not mobile else '')
+    cols = 3 if mobile else len(talk['palette']); gap = 18 if mobile else 22
+    sw = (w - 2 * M - gap * (cols - 1)) / cols; sh = 120 if mobile else 132
+    rowh = sh + 96
+    for i, (col, name) in enumerate(talk['palette']):
+        x = M + (i % cols) * (sw + gap); y = 90 + (i // cols) * rowh; d = 0.15 + i * 0.08
+        out.append(f'<rect class="pop" style="{at(d)}" x="{x:.1f}" y="{y}" width="{sw:.1f}" height="{sh}" rx="16" fill="{col}" stroke="{t["rule"]}" stroke-width="1.5"/>')
+        out.append(T(name, 'sans', size + 6, x, y + sh + 36, t['ink'], cls='rise', style=at(d + 0.15))[0])
+        out.append(T(col.upper(), 'mono', size + 1, x, y + sh + 64, t['muted'], cls='rise', style=at(d + 0.18))[0])
+    rows = (len(talk['palette']) + cols - 1) // cols
+    return svg(w, 90 + rows * rowh, t, ''.join(out), 'Palette: ' + ', '.join(f'{n} {c}' for c, n in talk['palette']))
 
 # ─── README ─────────────────────────────────────────────────────────────────
-def pic(name, alt, href=None):
-    p = (f'<picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/{name}-m-dark.svg">'
-         f'<source media="(max-width: 600px)" srcset="assets/{name}-m-light.svg">'
-         f'<source media="(prefers-color-scheme: dark)" srcset="assets/{name}-dark.svg">'
-         f'<img src="assets/{name}-light.svg" alt="{escape(alt, {chr(34): "&quot;"})}" width="100%"></picture>')
+def pic(name, alt, href=None, base='assets/'):
+    p = (f'<picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="{base}{name}-m-dark.svg">'
+         f'<source media="(max-width: 600px)" srcset="{base}{name}-m-light.svg">'
+         f'<source media="(prefers-color-scheme: dark)" srcset="{base}{name}-dark.svg">'
+         f'<img src="{base}{name}-light.svg" alt="{escape(alt, {chr(34): "&quot;"})}" width="100%"></picture>')
     return f'<a href="{href}">{p}</a>' if href else p
 
 def readme():
-    cards = '\n'.join(
-        f'<p align="center">\n  {pic("talk-" + x["slug"], f"{i + 1:02d} — {x[chr(116) + chr(105) + chr(116) + chr(108) + chr(101)]}: {x[chr(100) + chr(101) + chr(115) + chr(99)]}", x["slug"] + "/")}\n</p>'
+    cards = '\n\n'.join(
+        f'<p align="center">\n  {pic("talk-" + x["slug"], f"{i + 1:02d} — " + x["title"] + ": " + x["desc"], x["slug"] + "/")}\n</p>'
         for i, x in enumerate(TALKS))
-    return f'''<p align="center">
+    return f"""<p align="center">
   {pic("banner", "presentations ❯ ls -1 — Every talk, one file. The slides for my talks, one folder each.")}
 </p>
 
@@ -533,21 +794,24 @@ has a light and a dark version and a phone layout, and they follow your system t
 
 | piece | what moves |
 | --- | --- |
-| **banner** | the prompt types `ls -1`, the title draws in, three real slides fan out, the marquee keeps scrolling |
-| **talk cards** | the cover slide wipes in, the title draws, the chips and the talk's own palette pop in |
+| **banner** | the prompt types `ls -1`, the title draws in, three mock slides fan out, the marquee keeps scrolling |
+| **talk cards** | a mock of the talk's cover wipes in, the title draws, the chips and the talk's own palette pop in |
 | **keys** | the keycaps pop in; every few seconds the `→` key gets pressed |
 | **house style** | the specimens draw in under a marching dashed rule |
 | **footer** | the prompt types `exit`, the progress bar fills, the cursor blinks |
 
+The mock slides are drawn from each talk's title and palette; the real slides are on each talk's own page.
 Everything plays once on load and stays still for people who prefer reduced motion.
 
-**Adding a talk:** put its folder next to `nixos-homelab/` with the deck as `index.html`, save a few 960×540
-screenshots in `assets/thumbs/` (cover first), add it to `TALKS` in `build.py`, and run:
+**Adding a talk:** put its folder next to `nixos-homelab/` with the deck as `index.html`, save its cover and a few
+other slides as 960×540 (plus 640×360 `-s`) JPEGs in `assets/thumbs/`, add it to `TALKS` in `build.py`, and run:
 
 ```sh
 pip install fonttools uharfbuzz brotli
 python3 build.py
 ```
+
+It writes this README, every talk's own README and all the images.
 
 **Editing a deck:** open its `index.html`, press `Esc`, edit, then save with `⌘S` / `Ctrl+S`.
 
@@ -557,8 +821,46 @@ python3 build.py
   {pic("footer", f"presentations ❯ exit — {AUTHOR}, {YEAR}")}
 </p>
 
-<p align="center"><sub>Built with <a href="https://bento.page">Bento Slides</a> (MIT) · Fraunces, Instrument Sans and JetBrains Mono under the SIL Open Font License 1.1</sub></p>
-'''
+<p align="center">
+  {pic("credits", "Credits: " + "; ".join(f"{n} ({l})" for _, n, l in CREDITS), "https://bento.page")}
+</p>
+"""
+
+def talk_readme(n, talk):
+    b = '../assets/'
+    s = talk['slug']
+    return f"""<p><a href="../"><code>❮ presentations</code></a></p>
+
+<p align="center">
+  {pic(f"{s}-hero", f"{talk['host']} ❯ cat README.md — {talk['title']}. {talk['desc']}", base=b)}
+</p>
+
+<p align="center"><a href="index.html"><code>▶ index.html</code></a> &nbsp;·&nbsp; <code>{talk['slides']} slides</code> &nbsp;·&nbsp; <code>{len(talk['chapters'])} chapters</code></p>
+
+<p align="center">
+  {pic(f"{s}-gallery", "Slides: " + "; ".join(f"{p} {ti}" for _, p, ti in talk['gallery']), base=b)}
+</p>
+
+<p align="center">
+  {pic(f"{s}-chapters", "Chapters: " + "; ".join(f"{a} {bb}, p.{dd}" for a, bb, _, dd in talk['chapters']), base=b)}
+</p>
+
+<p align="center">
+  {pic(f"{s}-mouse", "Mouse: " + "; ".join(f"{' / '.join(k)} = {w}" for k, w, _ in talk['mouse']) + ". " + talk['mouse_note'], base=b)}
+</p>
+
+> [!TIP]
+> This deck also takes every key from the [main README](../README.md): arrows, `Space`, `S` for speaker view,
+> `B` for a black screen, `L` for the laser pointer.
+
+<p align="center">
+  {pic(f"{s}-palette", "Palette: " + ", ".join(f"{nm} {c}" for c, nm in talk['palette']), base=b)}
+</p>
+
+<p align="center">
+  {pic(f"{s}-footer", f"{talk['host']} ❯ exit — {talk['slides']} slides, {talk['date']}", base=b)}
+</p>
+"""
 
 def main():
     os.makedirs(OUT, exist_ok=True)
@@ -568,12 +870,25 @@ def main():
             sfx = ('-m' if mobile else '') + '-' + theme
             write(f'banner{sfx}.svg', banner(t, mobile))
             for i, talk in enumerate(TALKS):
-                write(f'talk-{talk["slug"]}{sfx}.svg', talk_card(i + 1, talk, t, mobile))
+                s = talk['slug']
+                write(f'talk-{s}{sfx}.svg', talk_card(i + 1, talk, t, mobile))
+                write(f'{s}-hero{sfx}.svg', talk_hero(i + 1, talk, t, mobile))
+                write(f'{s}-gallery{sfx}.svg', gallery(talk, t, mobile))
+                write(f'{s}-chapters{sfx}.svg', chapters(talk, t, mobile))
+                write(f'{s}-mouse{sfx}.svg', keys(t, mobile, talk['mouse'], '[ MOUSE ]', talk['mouse_note'], press='Left click'))
+                write(f'{s}-palette{sfx}.svg', palette(talk, t, mobile))
+                write(f'{s}-footer{sfx}.svg', footer(t, mobile, talk['host'],
+                                                    f'{len(talk["chapters"]) - 1:02d} — {talk["chapters"][-1][1].upper()}',
+                                                    f'{talk["slides"]} / {talk["slides"]}'))
             write(f'keys{sfx}.svg', keys(t, mobile))
             write(f'style{sfx}.svg', house_style(t, mobile))
             write(f'footer{sfx}.svg', footer(t, mobile))
+            write(f'credits{sfx}.svg', credits(t, mobile))
     with open(os.path.join(ROOT, 'README.md'), 'w', encoding='utf-8') as f: f.write(readme())
-    print('built', len(os.listdir(OUT)) - 1, 'images and README.md')
+    for i, talk in enumerate(TALKS):
+        with open(os.path.join(ROOT, talk['slug'], 'README.md'), 'w', encoding='utf-8') as f: f.write(talk_readme(i + 1, talk))
+    n = sum(1 for f in os.listdir(OUT) if f.endswith('.svg'))
+    print(f'built {n} images, README.md and {len(TALKS)} talk page' + ('s' if len(TALKS) != 1 else ''))
 
 if __name__ == '__main__':
     main()

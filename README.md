@@ -29,21 +29,24 @@ has a light and a dark version and a phone layout, and they follow your system t
 
 | piece | what moves |
 | --- | --- |
-| **banner** | the prompt types `ls -1`, the title draws in, three real slides fan out, the marquee keeps scrolling |
-| **talk cards** | the cover slide wipes in, the title draws, the chips and the talk's own palette pop in |
+| **banner** | the prompt types `ls -1`, the title draws in, three mock slides fan out, the marquee keeps scrolling |
+| **talk cards** | a mock of the talk's cover wipes in, the title draws, the chips and the talk's own palette pop in |
 | **keys** | the keycaps pop in; every few seconds the `→` key gets pressed |
 | **house style** | the specimens draw in under a marching dashed rule |
 | **footer** | the prompt types `exit`, the progress bar fills, the cursor blinks |
 
+The mock slides are drawn from each talk's title and palette; the real slides are on each talk's own page.
 Everything plays once on load and stays still for people who prefer reduced motion.
 
-**Adding a talk:** put its folder next to `nixos-homelab/` with the deck as `index.html`, save a few 960×540
-screenshots in `assets/thumbs/` (cover first), add it to `TALKS` in `build.py`, and run:
+**Adding a talk:** put its folder next to `nixos-homelab/` with the deck as `index.html`, save its cover and a few
+other slides as 960×540 (plus 640×360 `-s`) JPEGs in `assets/thumbs/`, add it to `TALKS` in `build.py`, and run:
 
 ```sh
 pip install fonttools uharfbuzz brotli
 python3 build.py
 ```
+
+It writes this README, every talk's own README and all the images.
 
 **Editing a deck:** open its `index.html`, press `Esc`, edit, then save with `⌘S` / `Ctrl+S`.
 
@@ -53,4 +56,6 @@ python3 build.py
   <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/footer-m-dark.svg"><source media="(max-width: 600px)" srcset="assets/footer-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="presentations ❯ exit — Dias Stas, 2026" width="100%"></picture>
 </p>
 
-<p align="center"><sub>Built with <a href="https://bento.page">Bento Slides</a> (MIT) · Fraunces, Instrument Sans and JetBrains Mono under the SIL Open Font License 1.1</sub></p>
+<p align="center">
+  <a href="https://bento.page"><picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/credits-m-dark.svg"><source media="(max-width: 600px)" srcset="assets/credits-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="assets/credits-dark.svg"><img src="assets/credits-light.svg" alt="Credits: Bento Slides (MIT); Fraunces (OFL 1.1); Instrument Sans (OFL 1.1); JetBrains Mono (OFL 1.1)" width="100%"></picture></a>
+</p>
