@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="ds-network/"><picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/talk-ds-network-m-dark.svg"><source media="(max-width: 600px)" srcset="assets/talk-ds-network-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="assets/talk-ds-network-dark.svg"><img src="assets/talk-ds-network-light.svg" alt="02 — DS Network: How my Minecraft server works, explained for everyone: one doorman, a lobby that catches you, and three worlds behind it." width="100%"></picture></a>
+  <a href="minecraft-server/"><picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/talk-minecraft-server-m-dark.svg"><source media="(max-width: 600px)" srcset="assets/talk-minecraft-server-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="assets/talk-minecraft-server-dark.svg"><img src="assets/talk-minecraft-server-light.svg" alt="02 — DS Network: How my Minecraft server works, explained for everyone: one doorman, a lobby that catches you, and three worlds behind it." width="100%"></picture></a>
 </p>
 
 <p align="center">
@@ -45,6 +45,7 @@ has a light and a dark version and a phone layout, and they follow your system t
 | **footer** | the prompt types `exit`, the progress bar fills, the cursor blinks |
 
 The covers in the banner are for talks that don't exist (yet), drawn in the decks' style; the real slides are on each talk's own page. Edit `MOCK_COVERS` to change them.
+The Minecraft talk breaks the house style on purpose: its card and its own page are drawn by [`minecraft.py`](minecraft.py) in that deck's pixel style.
 Everything plays once on load and stays still for people who prefer reduced motion.
 
 **Adding a talk:** put its folder next to `nixos-homelab/` with the deck as `index.html`, save its cover and a few
@@ -66,5 +67,5 @@ It writes this README, every talk's own README and all the images.
 </p>
 
 <p align="center">
-  <a href="https://bento.page"><picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/credits-m-dark.svg"><source media="(max-width: 600px)" srcset="assets/credits-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="assets/credits-dark.svg"><img src="assets/credits-light.svg" alt="Credits: Bento Slides (MIT); Fraunces (OFL 1.1); Instrument Sans (OFL 1.1); JetBrains Mono (OFL 1.1)" width="100%"></picture></a>
+  <a href="https://bento.page"><picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/credits-m-dark.svg"><source media="(max-width: 600px)" srcset="assets/credits-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="assets/credits-dark.svg"><img src="assets/credits-light.svg" alt="Credits: Bento Slides (MIT); Fraunces (OFL 1.1); Instrument Sans (OFL 1.1); JetBrains Mono (OFL 1.1); Jersey 10 (OFL 1.1)" width="100%"></picture></a>
 </p>

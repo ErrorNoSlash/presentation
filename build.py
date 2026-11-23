@@ -16,12 +16,15 @@ off for people who prefer reduced motion.
     python3 build.py
 
 To add a talk: put its folder next to the others, drop a few 960x540 screenshots
-in assets/thumbs/ (cover first), add it to TALKS and run the script.
+in assets/thumbs/ (cover first), add it to TALKS and run the script. A talk with
+style='minecraft' gets its own page drawn by minecraft.py, in that deck's style.
 """
 import base64, io, json, os, re, zlib
 from xml.sax.saxutils import escape
 
 import uharfbuzz as hb
+
+import minecraft
 from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
@@ -71,6 +74,39 @@ TALKS = [
                         sub=['One mini PC, one flake,', 'and only two doors in.'], tag='01 · NOV 2026',
                         band=['29 CONTAINERS', 'ONE MINI PC', 'TWO DOORS', 'NIXOS 26.05', 'K3S'], block='22 SLIDES',
                         colors=dict(bg='#0D1B2E', ink='#F2F0EA', a1='#5277C3', a2='#7EBAE4', soft='#C9E1F3', dim='#AFC6DD')),
+    ),
+    dict(
+        slug='minecraft-server',
+        style='minecraft',          # drawn by minecraft.py in the deck's own pixel style
+        title='DS Network',
+        host='minecraft',
+        by='Dias & Franck',
+        date='nov 2026',
+        slides=14,
+        desc='How my Minecraft server works, explained for everyone: one doorman, '
+             'a lobby that catches you, and three worlds behind it.',
+        chips=['14 slides', '6 chapters', 'Dias & Franck', 'nov 2026'],
+        palette=[('#15151C', 'deepslate'), ('#7BD13F', 'grass'), ('#80FF20', 'xp green'), ('#FFD23F', 'gold'),
+                 ('#FFFF55', 'chat yellow'), ('#9B5DE5', 'portal'), ('#5EE6E0', 'diamond'), ('#E5383B', 'redstone')],
+        cover='minecraft-server-01.jpg',
+        gallery=[('minecraft-server-05', 5, 'Every player takes the same path.'),
+                 ('minecraft-server-07', 7, 'Phones, consoles, PCs: everyone gets in.'),
+                 ('minecraft-server-09', 9, 'Stop 3 · Three worlds to explore'),
+                 ('minecraft-server-10', 10, 'Busier worlds get more room to think.'),
+                 ('minecraft-server-11', 11, 'If a world crashes, you don’t get thrown out.'),
+                 ('minecraft-server-14', 14, 'Thank you!')],
+        # (icon, number, chapter, what it covers, pages, presenter, colour)
+        mc_chapters=[('grass', '01', 'The basics', 'What a server is, and where ours lives', '03–04', 'DIAS', 'gold'),
+                     ('door', '02', 'Getting in', 'The path every player takes, on any device', '05–07', 'DIAS', 'gold'),
+                     ('portal', '03', 'Lobby & worlds', 'Where you land, and where you play', '08–09', 'FRANCK', 'cyan'),
+                     ('chest', '04', 'Behind the scenes', 'How one small computer shares itself out', '10', 'FRANCK', 'cyan'),
+                     ('shield', '05', 'When things go wrong', 'Crashes, and the four locks that keep us safe', '11–12', 'FRANCK', 'cyan'),
+                     ('star', '06', 'Recap & questions', 'The big picture, then over to you', '13–14', 'DIAS + FRANCK', 'green')],
+        mouse_note='# off in laser mode (L), on links and buttons, and while dragging',
+        before=['Scan the QR code on slide 14 once with your own phone. It opens <https://hello.errornoslash.be>.',
+                'The speaker notes start with **[DIAS]** or **[FRANCK]**, so each of you knows when it’s your turn.',
+                'Check the descriptions of **Old survival** and **Anarchy** on slide 9 against how you use those worlds.',
+                'Slide 11 says players rejoin the world they left: that’s SmartRejoin’s default setting.'],
     ),
 ]
 
@@ -138,7 +174,7 @@ def deck_fonts(html_path):
     """Every embedded woff2 in a Bento deck (the slide data and the packed runtime), by family name."""
     html = open(html_path, encoding='utf-8').read()
     blobs = [html]
-    m = re.search(r'<script id="bento-rt"[^>]*>(.*?)</script>', html, re.S)
+    m = re.search(r'<script id="bento-rt"[^>]*type="bento/deflate-b86"[^>]*>(.*?)</script>', html, re.S)
     if m: blobs.append(zlib.decompress(b86decode(m.group(1).strip()), -15).decode('utf-8'))
     fonts = {}
     for blob in blobs:
@@ -196,6 +232,13 @@ def load_fonts():
     F['sans'] = Face(instance(found['Instrument Sans'], {'wght': 500}))
     F['mono'] = Face(instance(found['JetBrains Mono'], {'wght': 400}))
     F['monob'] = Face(instance(found['JetBrains Mono'], {'wght': 700}))
+    F['sans6'] = Face(instance(found['Instrument Sans'], {'wght': 600}))
+    for talk in TALKS:
+        if talk.get('style') == 'minecraft':
+            pix = deck_fonts(os.path.join(ROOT, talk['slug'], 'index.html'))
+            jersey = next((f for n, f in pix.items() if n and n.startswith('Jersey')), None)
+            if jersey is None: raise SystemExit(f'Jersey 10 not found in {talk["slug"]}/index.html')
+            F['pixel'] = Face(instance(jersey, {}))
 
 # ─── svg helpers ────────────────────────────────────────────────────────────
 DRAWN = '→←❯'   # the decks ship trimmed fonts without these, so they are drawn as strokes
@@ -755,14 +798,16 @@ CREDITS = [  # (label, name, licence)
     ('TITLES', 'Fraunces', 'OFL 1.1'),
     ('BODY', 'Instrument Sans', 'OFL 1.1'),
     ('LABELS', 'JetBrains Mono', 'OFL 1.1'),
+    ('PIXEL TITLES', 'Jersey 10', 'OFL 1.1'),
 ]
+CREDIT_FACE = {'BUILT WITH': 'serif', 'TITLES': 'serif', 'BODY': 'sans', 'LABELS': 'mono', 'PIXEL TITLES': 'pixel'}
 
 def credits(t, mobile):
     """The credits, set like the decks' chips: a label above each, the licence beside the name."""
     w = 640 if mobile else 1280; M = 40 if mobile else 80
     size = 21 if mobile else 16
     out = [T('[ CREDITS ]', 'monob', size - 1, M, 52, t['muted'], ls=2.4, cls='rise', style=at(0.05))[0]]
-    cols = 2 if mobile else 4; gap = 18
+    cols = 2 if mobile else min(len(CREDITS), 5); gap = 18
     cw = (w - 2 * M - gap * (cols - 1)) / cols; ch = size * 4.6
     for i, (lab, name, lic) in enumerate(CREDITS):
         x = M + (i % cols) * (cw + gap); y = 84 + (i // cols) * (ch + gap)
@@ -770,7 +815,7 @@ def credits(t, mobile):
         out.append(f'<g class="pop" style="{at(d)}">'
                    f'<rect x="{x:.1f}" y="{y:.1f}" width="{cw:.1f}" height="{ch:.1f}" rx="12" fill="{t["card"]}" stroke="{t["rule"]}" stroke-width="1.5"/>'
                    + T(lab, 'monob', size - 4, x + size, y + size * 1.55, t['muted'], ls=1.8)[0]
-                   + T(name, 'serif' if i == 0 else ('sans' if lab != 'LABELS' else 'mono'), size + 7, x + size, y + size * 3.35,
+                   + T(name, CREDIT_FACE.get(lab, 'sans'), size + 7 if lab != 'PIXEL TITLES' else size + 11, x + size, y + size * 3.35,
                        t['ink'])[0]
                    + T(lic, 'mono', size - 3, x + cw - size, y + size * 1.55, t['muted'], anchor='end')[0] + '</g>')
     rows = (len(CREDITS) + cols - 1) // cols
@@ -985,6 +1030,7 @@ has a light and a dark version and a phone layout, and they follow your system t
 | **footer** | the prompt types `exit`, the progress bar fills, the cursor blinks |
 
 The covers in the banner are for talks that don't exist (yet), drawn in the decks' style; the real slides are on each talk's own page. Edit `MOCK_COVERS` to change them.
+The Minecraft talk breaks the house style on purpose: its card and its own page are drawn by [`minecraft.py`](minecraft.py) in that deck's pixel style.
 Everything plays once on load and stays still for people who prefer reduced motion.
 
 **Adding a talk:** put its folder next to `nixos-homelab/` with the deck as `index.html`, save its cover and a few
@@ -1056,6 +1102,8 @@ def main():
             write(f'covers{sfx}.svg', covers_strip(t, mobile))
             for i, talk in enumerate(TALKS):
                 s = talk['slug']
+                if talk.get('style') == 'minecraft':
+                    continue                     # drawn below by minecraft.py
                 write(f'talk-{s}{sfx}.svg', talk_card(i + 1, talk, t, mobile))
                 write(f'{s}-hero{sfx}.svg', talk_hero(i + 1, talk, t, mobile))
                 write(f'{s}-gallery{sfx}.svg', gallery(talk, t, mobile))
@@ -1069,9 +1117,13 @@ def main():
             write(f'style{sfx}.svg', house_style(t, mobile))
             write(f'footer{sfx}.svg', footer(t, mobile))
             write(f'credits{sfx}.svg', credits(t, mobile))
+    for i, talk in enumerate(TALKS):
+        if talk.get('style') == 'minecraft':
+            minecraft.build(i + 1, dict(talk, _root=ROOT), {'pixel': F['pixel'], 'sans': F['sans'], 'sans6': F['sans6']}, write, thumb_uri, THEMES)
     with open(os.path.join(ROOT, 'README.md'), 'w', encoding='utf-8') as f: f.write(readme())
     for i, talk in enumerate(TALKS):
-        with open(os.path.join(ROOT, talk['slug'], 'README.md'), 'w', encoding='utf-8') as f: f.write(talk_readme(i + 1, talk))
+        page = minecraft.readme(i + 1, talk, pic) if talk.get('style') == 'minecraft' else talk_readme(i + 1, talk)
+        with open(os.path.join(ROOT, talk['slug'], 'README.md'), 'w', encoding='utf-8') as f: f.write(page)
     n = sum(1 for f in os.listdir(OUT) if f.endswith('.svg'))
     print(f'built {n} images, README.md and {len(TALKS)} talk page' + ('s' if len(TALKS) != 1 else ''))
 
