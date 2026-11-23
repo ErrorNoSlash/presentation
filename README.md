@@ -11,6 +11,10 @@
 </p>
 
 <p align="center">
+  <a href="ds-network/"><picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/talk-ds-network-m-dark.svg"><source media="(max-width: 600px)" srcset="assets/talk-ds-network-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="assets/talk-ds-network-dark.svg"><img src="assets/talk-ds-network-light.svg" alt="02 — DS Network: How my Minecraft server works, explained for everyone: one doorman, a lobby that catches you, and three worlds behind it." width="100%"></picture></a>
+</p>
+
+<p align="center">
   <picture><source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="assets/keys-m-dark.svg"><source media="(max-width: 600px)" srcset="assets/keys-m-light.svg"><source media="(prefers-color-scheme: dark)" srcset="assets/keys-dark.svg"><img src="assets/keys-light.svg" alt="Presenting: → / Space = Next; ← / PgUp = Previous; S = Speaker view; F = Fullscreen; B = Black screen; L = Laser pointer; M = Reduce motion; Esc = Back to editor" width="100%"></picture>
 </p>
 
