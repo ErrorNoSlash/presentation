@@ -290,41 +290,55 @@ def footer(talk, theme, mobile):
     return svg(W, H, theme, b, f'» /stop — {talk["slides"]} slides, {talk["date"]}')
 
 def talk_card(n, talk, theme, mobile, thumb_uri):
-    """Its card on the main page: the real cover in an item frame, title, chips, palette."""
+    """Its card on the main page: the real cover in an item frame, title, chips, palette.
+    Laid out on exactly the same grid as the house-style cards in build.py (same margins, cover box,
+    text column and baselines), so the cards line up on the main page; only the look is Minecraft."""
     T = THEMES[theme]
     W = 640 if mobile else 1280
-    pad = 20 if mobile else 40
+    M = 40 if mobile else 80
+    FR = 14 if mobile else 16                      # item frame + bevel around the cover
     if mobile:
-        cw = W - 2 * pad; ch = cw * 9 / 16
-        cx, cy, tx_, ty, tw = pad, pad, pad, pad + ch + 56, W - 2 * pad
+        ow = W - 2 * M; cx0, cy0 = M, 64           # outer box of the framed cover
     else:
-        cw = 520; ch = cw * 9 / 16
-        cx, cy, tx_, ty, tw = pad, pad + 10, pad + cw + 48, pad + 56, W - pad - (pad + cw + 48)
-    fr = 10
-    b = card(cx - 6, cy - 6, cw + 12, ch + 12, T)
-    b += (f'<g class="a wipe" {d(0.2)}><rect x="{cx-fr+6}" y="{cy-fr+6}" width="{cw+2*fr-12}" height="{ch+2*fr-12:.1f}" fill="{FRAME}"/>'
-          f'<image href="{thumb_uri(talk["cover"])}" x="{cx}" y="{cy}" width="{cw}" height="{ch:.1f}" preserveAspectRatio="xMidYMid slice"/></g>')
-    b += tx(f'{n:02d} — MINECRAFT', 'pixel', 20, tx_, ty - 22, T['muted'], ls=2, cls='a rise', extra=d(0.5))
-    b += f'<g class="a wipe" {d(0.6)}>' + tx(talk['title'], 'pixel', 52 if mobile else 64, tx_, ty + 44, T['ink'], shadow=T['tshadow']) + '</g>'
-    lines = wrap(talk['desc'], 'sans', 19, tw)
+        ow = 590; cx0, cy0 = M, 62                 # same box as the house-style cover mock
+    cw = ow - 2 * FR; ch = cw * 9 / 16; oh = ch + 2 * FR
+    b = card(cx0 + 4, cy0 + 4, ow - 8, oh - 8, T)
+    b += (f'<g class="a wipe" {d(0.2)}><rect x="{cx0 + 10}" y="{cy0 + 10}" width="{ow - 20}" height="{oh - 20:.1f}" fill="{FRAME}"/>'
+          f'<rect x="{cx0 + FR - 3}" y="{cy0 + FR - 3}" width="{cw + 6}" height="{ch + 6:.1f}" fill="{FRAME_IN}"/>'
+          f'<image href="{thumb_uri(talk["cover"])}" x="{cx0 + FR}" y="{cy0 + FR}" width="{cw}" height="{ch:.1f}" preserveAspectRatio="xMidYMid slice"/></g>')
+    if mobile:
+        x, tw = M, W - 2 * M
+        ky = cy0 + oh + 84; ty = ky + 86; tsz, dsz, dlh, csz, sq, sqg, lsz = 30, 28, 42, 24, 38, 50, 26
+    else:
+        x = M + ow + 64; tw = W - M - x
+        ky = 92; ty = 160; tsz, dsz, dlh, csz, sq, sqg, lsz = 24, 21, 32, 20, 30, 40, 22
+    b += tx(f'{n:02d} · MINECRAFT', 'pixel', tsz, x, ky, T['muted'], ls=2, cls='a rise', extra=d(0.45))
+    title = wrap(talk['title'], 'pixel', 80 if mobile else 76, tw)
+    for i, line in enumerate(title):
+        b += f'<g class="a wipe" {d(0.55 + i * 0.12)}>' + tx(line, 'pixel', 80 if mobile else 76, x, ty + i * 70, T['ink'], shadow=T['tshadow']) + '</g>'
+    y = ty + (len(title) - 1) * 70 + 50
+    lines = wrap(talk['desc'], 'sans', dsz, tw)
     for i, line in enumerate(lines):
-        b += tx(line, 'sans', 19, tx_, ty + 84 + i * 27, T['muted'], cls='a rise', extra=d(0.8 + i * 0.05))
-    x = tx_; y = ty + 84 + len(lines) * 27 + 4
+        b += tx(line, 'sans', dsz, x, y + i * dlh, T['muted'], cls='a rise', extra=d(0.8 + i * 0.05))
+    cy = y + (len(lines) - 1) * dlh + (34 if mobile else 28)
+    cx, chh = x, csz * 1.7
     for i, c in enumerate(talk['chips']):
-        w = wid(c, 'pixel', 18) + 24
-        if x + w > tx_ + tw: x = tx_; y += 42
-        b += (f'<g class="a pop" {d(1.0 + i*0.08)}><rect x="{x:.0f}" y="{y}" width="{w:.0f}" height="32" fill="none" stroke="{T["green"]}" stroke-width="2"/>'
-              + tx(c, 'pixel', 18, x + w / 2, y + 22, T['green'], 'middle') + '</g>')
-        x += w + 10
-    py = y + 48
+        w = wid(c, 'pixel', csz) + csz * 1.2
+        if cx + w > x + tw and cx > x: cx, cy = x, cy + chh + 10
+        b += (f'<g class="a pop" {d(1.05 + i*0.08)}><rect x="{cx:.0f}" y="{cy:.0f}" width="{w:.0f}" height="{chh:.0f}" fill="none" stroke="{T["green"]}" stroke-width="2"/>'
+              + tx(c, 'pixel', csz, cx + w / 2, cy + chh * 0.7, T['green'], 'middle') + '</g>')
+        cx += w + 10
+    py = cy + chh + (34 if mobile else 28)
     for i, (hexc, _) in enumerate(talk['palette']):
-        b += f'<rect class="a pop" {d(1.3 + i*0.05)} x="{tx_ + i*30}" y="{py}" width="22" height="22" fill="{hexc}" stroke="#000" stroke-width="2"/>'
-    # the same "▶ folder/ index.html" line the house-style cards end with
-    ly = py + 64
-    b += f'<path class="a rise" {d(1.7)} d="M {tx_} {ly - 17} l 14 8.5 l -14 8.5 z" fill="{T["ink"]}"/>'
-    b += tx(f'{talk["slug"]}/', 'pixel', 22, tx_ + 26, ly, T['ink'], cls='a rise', extra=d(1.7))
-    b += tx('index.html', 'pixel', 22, tx_ + 32 + wid(f'{talk["slug"]}/', 'pixel', 22), ly, T['muted'], cls='a rise', extra=d(1.7))
-    H = max((pad + ch + 20 + 260) if mobile else (pad * 2 + ch + 20), ly + 40)
+        b += f'<rect class="a pop" {d(1.3 + i*0.05)} x="{x + i*sqg}" y="{py:.0f}" width="{sq}" height="{sq}" fill="{hexc}" stroke="#000" stroke-width="2"/>'
+    note_x = x + len(talk['palette']) * sqg + 10
+    if not mobile and note_x + wid('# its own palette', 'pixel', 20) <= x + tw:
+        b += tx('# its own palette', 'pixel', 20, note_x, py + 22, T['muted'], cls='a rise', extra=d(1.6))
+    ly = py + sq + (62 if mobile else 48)
+    b += f'<path class="a rise" {d(1.7)} d="M {x} {ly - 17} l 14 8.5 l -14 8.5 z" fill="{T["ink"]}"/>'
+    b += tx(f'{talk["slug"]}/', 'pixel', lsz, x + 26, ly, T['ink'], cls='a rise', extra=d(1.7))
+    b += tx('index.html', 'pixel', lsz, x + 34 + wid(f'{talk["slug"]}/', 'pixel', lsz), ly, T['muted'], cls='a rise', extra=d(1.7))
+    H = int(ly + 56) if mobile else max(470, int(ly + 58))
     rule = HOUSE[theme]['rule']
     b = (f'<rect class="a wipe" {d(0.05)} x="0" y="0" width="{W}" height="2" fill="{rule}"/>' + b
          + f'<rect x="0" y="{H - 2:.0f}" width="{W}" height="2" fill="{rule}"/>')
